@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title desc">
+  <title id="title">Cartoon gangster (smaller hat)</title>
+  <desc id="desc">Cartoon gangster with a much smaller fedora, sunglasses, suit, no cigar.</desc>
+
+  <style>
+    :root{
+      --hat:#182028;
+      --hat-band:#d2a34a;
+      --suit:#24364f;
+      --shirt:#ffffff;
+      --tie:#b31f2b;
+      --skin:#f2c38b;
+      --glass:#111111;
+      --outline:#10151a;
+    }
+    .outline{stroke:var(--outline); stroke-linejoin:round; stroke-linecap:round; stroke-width:6}
+    .soft-outline{stroke:var(--outline); stroke-width:4; stroke-linecap:round; stroke-linejoin:round}
+  </style>
+
+  <defs>
+    <linearGradient id="hatGloss" x1="0" x2="1">
+      <stop offset="0" stop-color="#2a3338"/>
+      <stop offset="1" stop-color="#12181b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background circle -->
+
+  <!-- torso / suit -->
+  <g transform="translate(0,40)">
+    <path d="M156 360 C150 300 170 220 256 220 C342 220 362 300 356 360 L156 360 Z"
+          fill="var(--suit)" class="outline"/>
+    <path d="M230 220 L256 280 L282 220 L282 320 L230 320 Z" fill="var(--shirt)" class="soft-outline"/>
+    <path d="M256 240 L270 300 L256 320 L242 300 Z" fill="var(--tie)" class="outline"/>
+  </g>
+
+  <!-- head group -->
+  <g transform="translate(0,-10)">
+    <!-- face -->
+    <ellipse cx="256" cy="214" rx="92" ry="96" fill="var(--skin)" class="outline"/>
+    <!-- very small hat brim --> 
+    <ellipse cx="256" cy="128" rx="100" ry="18" fill="var(--hat)" class="outline"/>
+      <!-- very small hat crown -->
+    <path d="M178 122 C178 92 208 70 256 70 C304 70 334 92 334 122 C334 132 296 138 256 138 C216 138 178 132 178 122 Z"
+          fill="url(#hatGloss)" class="outline"/>
+    <!-- hat band -->
+    <rect x="200" y="98" width="112" height="12" rx="3" fill="var(--hat-band)" class="soft-outline"/>
+
+
+
+    <!-- sunglasses -->
+    <g>
+      <rect x="196" y="188" width="54" height="32" rx="8" fill="var(--glass)" class="outline"/>
+      <rect x="262" y="188" width="54" height="32" rx="8" fill="var(--glass)" class="outline"/>
+      <rect x="248" y="198" width="16" height="6" fill="var(--outline)" rx="2"/>
+      <path d="M188 174 C204 164 232 162 248 167" fill="none" stroke="var(--outline)" stroke-width="6" stroke-linecap="round"/>
+      <path d="M264 167 C288 162 316 164 328 174" fill="none" stroke="var(--outline)" stroke-width="6" stroke-linecap="round"/>
+    </g>
+
+    <path d="M254 210 q6 16 0 20" fill="none" stroke="#b37f5b" stroke-width="4" stroke-linecap="round"/>
+    <path d="M220 238 q36 18 72 0" fill="none" stroke="#8f5b3a" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="160" cy="214" rx="12" ry="18" fill="var(--skin)" stroke="var(--outline)" stroke-width="3"/>
+    <ellipse cx="352" cy="214" rx="12" ry="18" fill="var(--skin)" stroke="var(--outline)" stroke-width="3"/>
+  </g>
+</svg>
