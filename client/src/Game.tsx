@@ -6,6 +6,9 @@ import { SocketContext } from "./App";
 import { GameState, Player , Phase, Loot, LootType, GameType} from "../../shared";
 import "./App.css";
 
+
+const fakerText = "You are the faker, pick something random"
+
 function getBorderColor(type: GameType, phase: Phase) : string {
   if (phase == "choosing") {
     return "black"
@@ -112,6 +115,7 @@ function Game() {
         setGameType(gameState.gameType);
         setPhase(gameState.phase);
         setQuestion(gameState.question);
+        setCompletedPhase(gameState.playerArray[thisId].completedPhase)
       }
 
       const handleSocketDisconnect = () => {
@@ -155,6 +159,7 @@ function Game() {
   }
 
   function sendClick(index: number): void {
+    // setCompletedPhase(true)
     socket.emit("sendChoice",room,thisId,index);
   }
 
@@ -162,8 +167,12 @@ function Game() {
     socket.emit("sendVote",room,thisId,index);
   }
 
+  function sendGameChoice(type: GameType) : void {
+    socket.emit("sendGameTypeDecision", room, type);
+  }
+
   function questionChoiceButtons(type: GameType): JSX.Element {
-    const hands = [1,0];
+    // const hands = [1,0];
     const numbers = [1,2,3,4,5];
     switch (type) {
       case "hands":
@@ -174,13 +183,13 @@ function Game() {
       case "numbers":
         return <g>
           {numbers.map((val:number, index:number) => 
-            <button className="buttonGame" onClick={() => sendClick(val)}>{val}</button>
+            <button key={index} className="buttonGame" onClick={() => sendClick(val)}>{val}</button>
           )}
         </g>
       case "point":
         return <g>
           {playerNames.map((name: string, index: number) => 
-            <button className="buttonGame" onClick={() => sendClick(index)}>{name}</button>
+            <button key={index} className="buttonGame" onClick={() => sendClick(index)}>{name}</button>
           )}
         </g>
     }
@@ -193,25 +202,38 @@ function Game() {
     )
   },[playerNames])
 
+  const gameTypeButtons: JSX.Element = (
+    <>
+      <button className="buttonGame" onClick={() => sendGameChoice("hands")}>Hands</button>
+      <button className="buttonGame" onClick={() => sendGameChoice("numbers")}>Numbers</button>
+      <button className="buttonGame" onClick={() => sendGameChoice("point")}>Pointing</button>
+    </>
+  )
+
+  const questionText: string = useMemo(() => {
+    if (thisId == fakerIndex) {
+      return fakerText
+    }
+    else return question
+  },[question,fakerIndex])
+
   return<div className="container">
       <h2>Phase: {phase}</h2>
 
-      {phase === "choosing" && (
-        <button className="buttonGame" onClick={handleClick}>
-          Choose an Option
-        </button>
+      {(phase === "choosing" && (!completedPhase)) && (
+        gameTypeButtons
       )}
 
-      {phase === "answering" && (
+      {phase === "answering" && !completedPhase && (
         <>
-          <p className="textGame">{question}</p>
+          <p className="textGame">{questionText}</p>
           {questionChoiceButtonsHandler}
         </>
       )}
 
-      {phase === "voting" && (
+      {phase === "voting" && !completedPhase && (
         <>
-          <p className="textGame">Vote for your favorite!</p>
+          <p className="textGame">Vote for who you think is faking</p>
           {voteButtons}
         </>
       )}

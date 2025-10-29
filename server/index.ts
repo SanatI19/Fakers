@@ -182,6 +182,12 @@ function getRandomGameType() : GameType {
     }
 }
 
+function setAllIncomplete(playerArray: Player[]) : void {
+    for (const player of playerArray) {
+        player.completedPhase = false;
+    }
+}
+
 const games : Record<string,GameState> = {};
 const gameTimers : Record<string,NodeJS.Timeout> = {}
 const socketToRoom : Record<string,string> = {};
@@ -427,11 +433,20 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
     })
 
     socket.on("sendChoice",(room: string, id: number, index: number) => {
+        if (!games[room]) {
+            socket.emit("failedToAccessRoom")
+            return
+        };
         games[room].choiceArray[id] = index;
         games[room].counter++;
+        games[room].playerArray[id].completedPhase = true;
         if (games[room].counter == games[room].playerArray.length) {
             // games[room].counter = 0;
             changeToVoting(room)
+        }
+        else {
+            socket.emit("getGameState",games[room])
+            io.to(games[room].displaySocket).emit("getGameState",games[room])
         }
     })
 
@@ -505,6 +520,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             return
         }
         games[room].counter = 0;
+        setAllIncomplete(games[room].playerArray);
         games[room].phase = "voting"
         io.to(room).emit("getGameState",games[room])
         setTimer(room,changeToReveal)
@@ -516,6 +532,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             return
         }
         games[room].phase = "reveal";
+        setAllIncomplete(games[room].playerArray);
         io.to(room).emit("getGameState",games[room])
         setTimer(room,changeToChoosing)
     }
