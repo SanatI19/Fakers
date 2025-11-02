@@ -19,7 +19,7 @@ res.sendFile(path.join(__dirname, "../../../client/dist/index.html"));
 const server = createServer(app)
 const io = new Server<ClientToServerEvents,ServerToClientEvents>(server, {
     cors: {
-        origin: ["http://localhost:5174","https://admin.socket.io"],
+        origin: ["http://localhost:5173","https://admin.socket.io"],
         methods: ["GET","POST"],
         credentials: true
     }
@@ -452,10 +452,12 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
 
     socket.on("sendVote",(room: string, id: number, index: number) => {
         games[room].voteArray[id] = index;
-        games[room].counter++;
-        if (games[room].counter == games[room].playerArray.length) {
-            changeToReveal(room)
-        }
+        // games[room].counter++;
+        // socket.emit("")
+        io.to(games[room].displaySocket).emit("getGameState",games[room]);
+        // if (games[room].counter == games[room].playerArray.length) {
+        //     changeToReveal(room)
+        // }
     })
     
 
@@ -495,6 +497,8 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].phase = "choosing"
         games[room].chooserIndex = getRandomPlayer(games[room].playerArray.length);
         games[room].fakerIndex = getRandomPlayer(games[room].playerArray.length);
+        resetChoiceArray(room);
+        resetVoteArray(room);
         io.to(room).emit("getGameState",games[room])
         setTimer(room,changeToAnswering)
     }
