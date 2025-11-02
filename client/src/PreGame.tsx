@@ -19,12 +19,12 @@ function PreGame() {
   const navigate = useNavigate();
 //   const [room, setRoom] = useState("")
 //   const [messages, setMessages] = useState<string[]>([]);
-  const [playerArray, setPlayerArray] = useState<Player[]>([]);
+  // const [playerArray, setPlayerArray] = useState<Player[]>([]);
   const [length,setLength] = useState(Number);
   const [name,setName] = useState<string>("");
   const [nameChange, setNameChange] = useState<boolean>(false);
   const [connectedArray, setConnectedArray] = useState<boolean[]>([true,true,true,true,true,true,true,true]);
-  const [hoverIndex, setHoverIndex] = useState<number>(-1);
+  // const [hoverIndex, setHoverIndex] = useState<number>(-1);
   const {state} = useLocation()
   const room = state.room;
   console.log(room)
@@ -61,12 +61,12 @@ function PreGame() {
   // const removePlayer = (index: number) => {
   //   console.log(`Removing player: ${index}`)
   // } 
-  function removePlayer(index: number) {
-    console.log(`Removing player: ${index}`)
-    socket.emit("requestRemovePlayer", room, index);
-  }
+  // function removePlayer(index: number) {
+  //   console.log(`Removing player: ${index}`)
+  //   socket.emit("requestRemovePlayer", room, index);
+  // }
 
-  console.log(hoverIndex);
+  // console.log(hoverIndex);
 
     useEffect(() => {
         let playerUUID = sessionStorage.getItem("playerUUID");
@@ -93,7 +93,7 @@ function PreGame() {
         }
 
         const handleSendPlayerArray = (playerArrayIn: Player[]) => {
-            setPlayerArray(playerArrayIn);
+            // setPlayerArray(playerArrayIn);
             setLength(playerArrayIn.length);
             setName(playerArrayIn[thisId].name)
         }
@@ -104,7 +104,7 @@ function PreGame() {
 
         const handleRemovePlayerFromLobby = (index: number, playerArray: Player[]) => {
           console.log(index)
-          setPlayerArray(playerArray);
+          // setPlayerArray(playerArray);
           if (thisId == index) {
             navigate(`/`);
           }

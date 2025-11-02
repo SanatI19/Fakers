@@ -20,9 +20,9 @@ function PreGameDisplay() {
 //   const [room, setRoom] = useState("")
 //   const [messages, setMessages] = useState<string[]>([]);
   const [playerArray, setPlayerArray] = useState<Player[]>([]);
-  const [length,setLength] = useState(Number);
+  // const [length,setLength] = useState(Number);
   // const [name,setName] = useState<string>("");
-  const [nameChange, setNameChange] = useState<boolean>(false);
+  // const [nameChange, setNameChange] = useState<boolean>(false);
   const [connectedArray, setConnectedArray] = useState<boolean[]>([true,true,true,true,true,true,true,true]);
   const [hoverIndex, setHoverIndex] = useState<number>(-1);
   const {state} = useLocation()
@@ -37,9 +37,9 @@ function PreGameDisplay() {
   // }
   console.log(connectedArray);
   
-  const triggerStartGame = () => {
-    socket.emit("triggerStartGame",room)
-  }
+  // const triggerStartGame = () => {
+  //   socket.emit("triggerStartGame",room)
+  // }
 
   // const changeTheName = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   // setName(e.target.value);
@@ -94,7 +94,7 @@ function PreGameDisplay() {
 
         const handleSendPlayerArray = (playerArrayIn: Player[]) => {
             setPlayerArray(playerArrayIn);
-            setLength(playerArrayIn.length);
+            // setLength(playerArrayIn.length);
             // setName(playerArrayIn[thisId].name)
         }
 

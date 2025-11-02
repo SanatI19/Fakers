@@ -12,7 +12,7 @@
 import { useContext, useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { SocketContext } from "./App";
-import { GameType } from "../../shared";
+// import { GameType } from "../../shared";
 
 
 
