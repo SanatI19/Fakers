@@ -6,6 +6,7 @@ import cors from "cors";
 import {ServerToClientEvents , ClientToServerEvents, Player, GameState, Phase, Loot, LootType, GameType, IDisplayFunction} from "../shared";
 import path from "path";
 import { readFileSync } from "fs";
+import { max } from 'd3';
 
 const app = express()
 app.use(cors());
@@ -57,6 +58,10 @@ function resetVoteArray(room: string) {
     games[room].voteArray = Array(games[room].playerArray.length).fill(-1);
 }
 
+function resetStoredChoices(room: string) {
+    games[room].storedChoices = Array.from({ length: games[room].playerArray.length }, () => []);
+}
+
 
 function newGameState(type: boolean):GameState {
     const playerArray : Player[] = []
@@ -77,6 +82,8 @@ function newGameState(type: boolean):GameState {
         choiceArray: [], 
         counter: 0, 
         voteArray: [],
+        storedChoices: [],
+        votedIndex: -1,
     };
 }
 
@@ -99,7 +106,11 @@ function deleteRoom(room: string) {
   delete games[room];
 }
 
-
+function updateStoredVotes(room: string) : void {
+    for (let i = 0; i < games[room].voteArray.length; i++) {
+        games[room].storedChoices[i].push(games[room].voteArray[i]);
+    }
+}
 
 
 
@@ -185,6 +196,29 @@ function getRandomGameType() : GameType {
 function setAllIncomplete(playerArray: Player[]) : void {
     for (const player of playerArray) {
         player.completedPhase = false;
+    }
+}
+
+function calculateVotes(room: string) : void {
+    const votes = games[room].voteArray;
+    const out =  Array(votes.length).fill(0);
+    for (const x of votes) {
+        if (x >= 0) {
+        out[x] += 1
+        }
+    }
+    games[room].votedIndex = determineVoteSuccess(out, votes.length);
+}
+
+function determineVoteSuccess(totalVotes: number[], numPlayers: number) : number {
+    const maxVotes = Math.max(...totalVotes);
+    // const indexMax = totalVotes.indexOf(maxVotes);
+
+    if (maxVotes / numPlayers > 0.65) {
+        return totalVotes.indexOf(maxVotes);
+    }
+    else {
+        return -1
     }
 }
 
@@ -375,7 +409,8 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             // games[room].lootDict = getLootDict(games[room].lootDeck);
             resetChoiceArray(room);
             resetVoteArray(room);
-            setTimer(room,changeToAnswering)
+            resetStoredChoices(room);
+            setTimer(room,changeToAnsweringAfterTimer)
             io.to(room).emit("startGame");
         }
     })
@@ -489,22 +524,35 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
     //     delete gameTimers[room];
     //     gameTimers[room] = setTimeout(() => sendToDisplay(room, type), SELECTION_TIMER);
     // }
+
     function changeToChoosing(room: string) : void {
         if (!(games[room])) {
             io.to(room).emit("failedToAccessRoom") 
             return
         }
         games[room].phase = "choosing"
+        resetStoredChoices(room);
         games[room].chooserIndex = getRandomPlayer(games[room].playerArray.length);
         games[room].fakerIndex = getRandomPlayer(games[room].playerArray.length);
-        resetChoiceArray(room);
-        resetVoteArray(room);
         io.to(room).emit("getGameState",games[room])
-        setTimer(room,changeToAnswering)
+        setTimer(room,changeToAnsweringAfterTimer)
     }
 
+    // function possibly
     function changeToAnswering(room: string) : void {
-        console.log("changing to choosing")
+        if (!(games[room])) {
+            io.to(room).emit("failedToAccessRoom") 
+            return
+        }
+        prepForAnswering(room,games[room].gameType)
+        // resetVoteArray(room)
+        //sends to the regular people in the room
+        io.to(room).emit("getGameState",games[room])
+        // need to send out the question to each member in the regular game, including faker
+        setTimer(room, changeToVoting);
+    }
+
+    function changeToAnsweringAfterTimer(room: string) : void {
         if (!(games[room])) {
             io.to(room).emit("failedToAccessRoom") 
             return
@@ -513,7 +561,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].gameType = getRandomGameType();
         prepForAnswering(room,games[room].gameType)
         io.to(room).emit("getGameState",games[room])
-        console.log("changing to answering")
         setTimer(room,changeToVoting)
     }
 
@@ -536,12 +583,58 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             return
         }
         games[room].phase = "reveal";
+        updateStoredVotes(room);
         setAllIncomplete(games[room].playerArray);
+        calculateVotes(room);
         io.to(room).emit("getGameState",games[room])
-        setTimer(room,changeToChoosing)
+        setTimer(room,revealOver)
     }
 
-    function sendToDisplay(room: string, type: GameType) {
+
+    function revealOver(room: string) : void {
+        if (!(games[room])) {
+            io.to(room).emit("failedToAccessRoom") 
+            return
+        }
+        resetVoteArray(room)
+        resetChoiceArray(room);
+        if ((games[room].storedChoices[0].length < 3) && (games[room].votedIndex != games[room].fakerIndex)) {
+            changeToAnswering(room);
+        }
+        else {
+            changeToScoring(room);
+        }
+    }
+
+    function changeToScoring(room: string): void {
+        games[room].phase ="scoring";
+        io.to(games[room].displaySocket).emit("getGameState",games[room]);
+        // setTimer(room,changeToChoosing)
+    }
+
+    function changeToGameOver(room: string): void {
+        if (!(games[room])) {
+            io.to(room).emit("failedToAccessRoom") 
+            return
+        }
+        games[room].phase ="scoring";
+        io.to(games[room].displaySocket).emit("getGameState",games[room]);
+        // setTimer(room,changeToChoosing)
+    }
+
+    socket.on("scoringAnimationOver", (room: string) => {
+        if (!games[room]) {
+            io.to(room).emit("failedToAccessRoom")
+        }
+        if (true) {
+            changeToChoosing(room)
+        }
+        else {
+            changeToGameOver(room)
+        }
+    })
+
+    function sendToDisplay(room: string, type: GameType): void {
         // switch (type) {
         //     case "hands":
         //         sendHandsToDisplay(room);

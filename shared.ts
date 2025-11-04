@@ -48,6 +48,7 @@ export interface ClientToServerEvents {
     sendChoice: (room: string, id: number, index: number) => void;
     sendVote: (room: string, id:number, index: number) => void;
     sendGameTypeDecision: (room: string, type: GameType) => void;
+    scoringAnimationOver: (room: string) => void;
     // list all of the client to server events here 
 }
 
@@ -74,13 +75,15 @@ export interface GameState {
     chooserIndex: number;
     choiceArray: number[];
     voteArray: number[];
+    storedChoices: number[][];
+    votedIndex: number;
 }
 
 export interface IDisplayFunction {
     (room: string): void;
 }
 
-export type Phase = "choosing" | "answering" | "voting" | "reveal";
+export type Phase = "choosing" | "answering" | "voting" | "reveal" | "scoring";
 
 export type GameType = "hands" | "numbers" | "point";
 

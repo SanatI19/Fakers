@@ -101,11 +101,11 @@ function getPlayerY(index: number) : number {
 }
 
 function getVoteX(index: number) : number {
-  return getPlayerX(index) + 5
+  return getPlayerX(index) - 4
 }
 
 function getVoteY(index: number) : number {
-  return getPlayerY(index) -1
+  return getPlayerY(index) - 2
 }
 
 function GameDisplay() {
@@ -126,6 +126,8 @@ function GameDisplay() {
   const [question, setQuestion] = useState<string>("");
   // const [chooserIndex, setChooserIndex] = useState<number>(0);
   const [totalVotes, setTotalVotes] = useState<number[]>([]);
+  const [voteIndex, setVoteIndex] = useState<number>(-1);
+  const [fakerIndex, setFakerIndex] = useState<number>(-1);
   // const [playerTableHover, setPlayerTableHover] = useState<boolean>(false);
 
   const {state} = useLocation()
@@ -238,6 +240,8 @@ function GameDisplay() {
       setPhase(gameState.phase);
       setQuestion(gameState.question);
       setTotalVotes(getTotalVotes(gameState.voteArray));
+      setVoteIndex(gameState.votedIndex);
+      setFakerIndex(gameState.fakerIndex);
       // const thisPlayer = playerArray[thisId];
       // setPlayerHealth(playerArray.map(player => player.health));
       // setThisPlayer(thisPlayer);
@@ -294,7 +298,7 @@ function GameDisplay() {
         <text x={getPlayerX(index)} y={getPlayerY(index)+7} fontSize={2}>{playerNames[index]}</text>
       </g>
     ))
-  ,[choiceArray,gameType, phase])
+  ,[choiceArray,gameType, phase, playerNames])
 
   const raisedImages: JSX.Element[] = useMemo(() => 
     choiceArray.map((val,index) => (
@@ -309,7 +313,7 @@ function GameDisplay() {
         <text x={getPlayerX(index)} y={getPlayerY(index)+7} fontSize={2}>{playerNames[index]}</text>
       </g>
     ))
-  ,[choiceArray])
+  ,[choiceArray,playerNames])
 
   const pointingImages : JSX.Element[] = useMemo(() => {
     const counts: number[] = Array(choiceArray.length).fill(0);
@@ -322,13 +326,13 @@ function GameDisplay() {
       </g>)
 
     }))}
-  ,[choiceArray])
+  ,[choiceArray,playerNames])
 
   const numberImages : JSX.Element[] = useMemo(() => 
     choiceArray.map((val,index) => (
       val >= 0 ?
       <g key={index}>
-        <circle cx={getPlayerX(index) + 2} cy={getPlayerY(index)-2} r={2} fill="black"/>
+        <circle cx={getPlayerX(index) + 3} cy={getPlayerY(index)-2} r={1.5} fill="black"/>
         <text x={getPlayerX(index)+2} y={getPlayerY(index)-2} fontSize={1} fill="white">{val}</text>
       </g>
       : <g key={index}></g>
@@ -358,13 +362,32 @@ function GameDisplay() {
       val > 0 ? 
       <g key={index}>
         <image href={voteImage} x={getVoteX(index)} y={getVoteY(index)} height={4} width={4}></image>
-        <text x={getVoteX(index)+1} y={getVoteY(index)+2} fill="black" fontSize={2}>{val}</text>
+        <text x={getVoteX(index)+2} y={getVoteY(index)+2.5} fill="black" fontSize={2}>{val}</text>
       </g>
       : null
     )
   },[totalVotes])
 
+
+  const revealImages = useMemo(() => {
+    if (voteIndex == -1) {
+      return <g>
+        <text x={30} y={20} fontSize={5}>Faker still lurks</text>
+      </g>
+    }
+    else {
+      if (voteIndex == fakerIndex) {
+        return <g>
+          <text x={30} y={20} fontSize={5}>{playerNames[voteIndex]} was the faker</text>
+        </g>
+      }
+        return <g>
+          <text x={30} y={20} fontSize={5}>{playerNames[voteIndex]} was not the faker</text>
+        </g>
+    }
+  },[playerNames, voteIndex])
   // const voteImages = 
+  // console.log(voteIndex)
   
   return <svg id="main" x = "0px" y="0px" xmlns = "http://www.w3.org/2000/svg" viewBox="0 0 100 50">
       <g>
@@ -391,7 +414,13 @@ function GameDisplay() {
                 {voteImages}
               </g>
             case "reveal":
-              return <g></g>
+              return <g>
+                {revealImages}
+              </g>
+            case "scoring":
+              return <g>
+                {/* {scoringImages} */}
+              </g>
           }
         })()}
       </g>

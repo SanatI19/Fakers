@@ -201,7 +201,7 @@ function Game() {
   const voteButtons = useMemo(() => {
     return playerNames.map((name:string, index: number) => 
       index == thisId ? null :
-      <button key={index} className="buttonGame" disabled={voteIndex == index} onClick={() => sendVote(index)}>{name}</button>
+      <button key={`${index}-${voteIndex}`} className="buttonGame" disabled={voteIndex == index} style={{backgroundColor: voteIndex==index ? "green": "lightgrey", opacity: voteIndex==index ? 0.8 : 1}} onClick={() => sendVote(index)}>{name}</button>
     )
   },[playerNames,voteIndex])
 
