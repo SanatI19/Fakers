@@ -89,7 +89,7 @@ export interface IDisplayFunction {
     (room: string): void;
 }
 
-export type Phase = "choosing" | "answering" | "voting" | "reveal" | "scoring";
+export type Phase = "choosing" | "answering" | "voting" | "reveal" | "scoring" | "gameover";
 
 export type GameType = "hands" | "numbers" | "point";
 

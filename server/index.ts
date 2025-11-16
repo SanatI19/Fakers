@@ -440,15 +440,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom");
         }
         else {
-            // resetRoomTimeout(room, 1);
-            // games[room].chooserIndex = getRandomPlayer(games[room].playerArray.length);
-            // games[room].fakerIndex = getRandomPlayer(games[room].playerArray.length);
-            // games[room].started = true;
-            // games[room].joinable = false;
-            // games[room].totalAlivePlayers = games[room].playerArray.length;
-            // games[room].lootTurnPlayerIndex = -1
-            // games[room].bossId = chooseGodfather(games[room].totalAlivePlayers);
-            // games[room].lootDict = getLootDict(games[room].lootDeck);
             resetChoiceArray(room);
             resetVoteArray(room);
             resetVoteLocks(room);
@@ -456,7 +447,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             resetRoundQuestions(room);
             changeToChoosing(room);
             games[room].votesNeeded = Math.ceil(0.65*games[room].playerArray.length)
-            // setTimer(room,changeToAnsweringAfterTimer,CHOOSING_TIMER)
             io.to(room).emit("startGame");
         }
     })
@@ -501,19 +491,11 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].phase = "answering";
     }
 
-    // socket.on("set")
     socket.on("sendGameTypeDecision", (room: string, type: GameType) => {
-        // need to get the question
         games[room].gameType = type;
-        // REMOVE THE TIMER;
         clearTimeout(gameTimers[room])
         delete gameTimers[room];
         changeToAnswering(room)
-        // prepForAnswering(room,type)
-        //sends to the regular people in the room
-        // io.to(room).emit("getGameState",games[room])
-        // need to send out the question to each member in the regular game, including faker
-        // setTimer(room, changeToVoting,ANSWER_TIMER)
     })
 
     socket.on("sendChoice",(room: string, id: number, index: number) => {
@@ -525,7 +507,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].counter++;
         games[room].playerArray[id].completedPhase = true;
         if (games[room].counter == games[room].playerArray.length) {
-            // games[room].counter = 0;
             changeToVoting(room)
         }
         else {
@@ -540,12 +521,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             return
         };
         games[room].voteArray[id] = index;
-        // games[room].counter++;
-        // socket.emit("")
         io.to(games[room].displaySocket).emit("getGameState",games[room]);
-        // if (games[room].counter == games[room].playerArray.length) {
-        //     changeToReveal(room)
-        // }
     })
 
     socket.on("lockInVote",(room: string, id: number) => {
@@ -563,16 +539,12 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
 
     socket.on("disconnect", (reason) => {
         const roomId = socketToRoom[socket.id];
-        // console.log(games)
         if (roomId !== undefined && games[roomId] !== undefined) {
             const index = games[roomId].sockets.indexOf(socket.id);
             if (index > 0) {
                 games[roomId].playerArray[index].connected = false;
                 io.to(roomId).emit("changeConnected",games[roomId].playerArray);
             }
-            // else if (games[roomId].displaySocket == socket.id) {
-                
-            // }
         }
     })
 
@@ -582,13 +554,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         delete gameTimers[room];
         gameTimers[room] = setTimeout(() => input(room), SELECTION_TIMER);
     }
-
-    // function setDisplayTimer(room: string, type: GameType) {
-    //     if (!games[room]) return;
-    //     clearTimeout(gameTimers[room])
-    //     delete gameTimers[room];
-    //     gameTimers[room] = setTimeout(() => sendToDisplay(room, type), SELECTION_TIMER);
-    // }
 
     function changeToChoosing(room: string) : void {
         if (!(games[room])) {
@@ -605,19 +570,14 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         setTimer(room,changeToAnsweringAfterTimer,CHOOSING_TIMER) 
     }
 
-    // function possibly
     function changeToAnswering(room: string) : void {
         if (!(games[room])) {
             socket.emit("failedToAccessRoom") 
             return
         }
         prepForAnswering(room,games[room].gameType)
-        // resetVoteArray(room)
-        //sends to the regular people in the room
         io.to(room).emit("getGameState",games[room])
-        // need to send out the question to each member in the regular game, including faker
-
-        // setTimer(room, changeToVoting,ANSWER_TIMER);
+        setTimer(room, changeToVoting,ANSWER_TIMER);
     }
 
     function changeToAnsweringAfterTimer(room: string) : void {
@@ -629,7 +589,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].gameType = getRandomGameType();
         prepForAnswering(room,games[room].gameType)
         io.to(room).emit("getGameState",games[room])
-        // setTimer(room,changeToVoting,ANSWER_TIMER)
+        setTimer(room,changeToVoting,ANSWER_TIMER)
     }
 
 
@@ -642,7 +602,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         setAllIncomplete(games[room].playerArray);
         games[room].phase = "voting"
         io.to(room).emit("getGameState",games[room])
-        // setTimer(room,changeToReveal,VOTE_TIMER)
+        setTimer(room,changeToReveal,VOTE_TIMER)
     }
 
     function changeToReveal(room: string) : void {
@@ -660,7 +620,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         // setTimer(room,revealOver,0)
         // THIS NEEDS TO BE CHANGED, IT SHOULD NO LONGER BE BASED ON A TIMER BUT SHOULD INSTEAD BE BASED ON THE DISPLAY
     }
-
 
     socket.on("revealOver", (room: string) => {
         revealOver(room);
@@ -694,8 +653,8 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom") 
             return
         }
-        games[room].phase ="scoring";
-        io.to(games[room].displaySocket).emit("getGameState",games[room]);
+        games[room].phase ="gameover";
+        io.to(room).emit("getGameState",games[room]);
         // setTimer(room,changeToChoosing)
     }
 
@@ -715,9 +674,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
     })
 
     function calculateScores(room: string): void {
-        // const storedChoices = games[room].storedChoices
         for (let i = 0; i < games[room].playerArray.length; i++) {
-            // const notVotedScore = 10*(games[room].playerArray.length-1) - 10*(games[room])
             if (i == games[room].fakerIndex) {
                 games[room].playerArray[i].totalScore += calculateFakerScore(room,i)
             }
@@ -736,12 +693,9 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             if (i == games[room].fakerIndex) {
                 continue;
             }
-
             for (let j = 0; j < storedChoices[0].length; j++) {
                 votedFor[j] += storedChoices[i][j] == games[room].fakerIndex ? 1 : 0;
             }
-            
-            
         }
         for (let i = 0; i < votedFor.length; i++) {
             if (i == votedFor.length-1 && games[room].fakerCaught) {
@@ -764,10 +718,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             if (i == games[room].fakerIndex) {
                 continue;
             }
-            // else if (i == index) {
-
-            //     continue;
-            // }
             for (let j = 0; j < storedChoices[i].length; j++) {
                 if (storedChoices[i][j] == index) {
                     votedFor[j]++;
@@ -791,45 +741,8 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             }
         }
 
-
         return outNum
     }
-
-    function sendToDisplay(room: string, type: GameType): void {
-        // switch (type) {
-        //     case "hands":
-        //         sendHandsToDisplay(room);
-        //         break
-        //     case "numbers":
-        //         sendNumbersToDisplay(room);
-        //         break
-        //     case "point":
-        //         sendPointsToDisplay(room);
-        //         break
-        // }
-        // games[room].sendQuestion = true;
-        io.to(room).emit("getGameState",games[room])
-    }
-
-    function sendPointsToDisplay(room: string) {
-        if (!games[room]) return;
-        clearTimeout(gameTimers[room])
-        io.to(games[room].displaySocket).emit("displayPoints")
-    }
-
-    function sendNumbersToDisplay(room: string) {
-        if (!games[room]) return;
-        clearTimeout(gameTimers[room])
-        io.to(games[room].displaySocket).emit("displayNumbers")
-    }
-
-    function sendHandsToDisplay(room: string) {
-        if (!games[room]) return;
-        clearTimeout(gameTimers[room])
-        io.to(games[room].displaySocket).emit("displayHands")
-    }
-
-    
 })
 
 instrument(io, {
