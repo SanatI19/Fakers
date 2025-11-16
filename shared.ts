@@ -49,6 +49,8 @@ export interface ClientToServerEvents {
     sendVote: (room: string, id:number, index: number) => void;
     sendGameTypeDecision: (room: string, type: GameType) => void;
     scoringAnimationOver: (room: string) => void;
+    lockInVote: (room: string, id: number) => void;
+    revealOver: (room: string) => void;
     // list all of the client to server events here 
 }
 
@@ -75,8 +77,12 @@ export interface GameState {
     chooserIndex: number;
     choiceArray: number[];
     voteArray: number[];
+    voteLocked: boolean[];
     storedChoices: number[][];
     votedIndex: number;
+    fakerCaught: boolean;
+    roundQuestions: string[];
+    votesNeeded: number;
 }
 
 export interface IDisplayFunction {
@@ -114,6 +120,7 @@ export class Player {
     public gems = 0;
 
     public completedPhase = false;
+    public prevScore = 0;
     public totalScore = 0;
 
 

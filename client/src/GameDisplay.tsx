@@ -1,6 +1,6 @@
 
 import { useContext, useEffect, useState, useMemo, JSX} from "react";
-// import { motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useLocation, useNavigate} from "react-router-dom";
 import { SocketContext } from "./App";
 import { GameState, Player , Phase, GameType} from "../../shared";
@@ -18,8 +18,12 @@ const raisedImagesRefs = ["/images/raise1.svg", "/images/raise2.svg",
   "/images/raise7.svg","/images/raise8.svg",
   "/images/raise9.svg","/images/raise10.svg"]  
 
-const voteImage = "/images/vote.svg";
+const voteImage = "/images/handcuffs.svg";
 const pointImage = "/images/point.svg";
+const jailImage = "/images/jail.svg";
+const fakerImage = "/images/faker.svg";
+const redXImage = "/images/redX.svg";
+const greenCheckImage = "/images/greenCheck.svg";
 
 function getTotalVotes(votes: number[]) : number[] {
   const out =  Array(votes.length).fill(0);
@@ -49,6 +53,11 @@ function getBorderColor(type: GameType, phase: Phase) : string {
   }
 }
 
+function getCenteredX(font: number, length: number): number {
+  const charWidth = font*0.5;
+  return 50 - length*charWidth/2
+  
+}
 // function getCompletedX(index: number) : number {
 //   const val = index % 5;
 //   switch (val) {
@@ -79,15 +88,15 @@ function getPlayerX(index: number) : number {
   const mid = index%5;
   switch (mid) {
     case 0:
-      return 10
+      return 5
     case 1:
-      return 30
+      return 25
     case 2: 
-      return 50
+      return 45
     case 3:
-      return 70
+      return 65
     case 4: 
-      return 90
+      return 85
     default:
       return 0
   }
@@ -95,10 +104,17 @@ function getPlayerX(index: number) : number {
 
 function getPlayerY(index: number) : number {
   if (index >=5) {
-    return 30
+    return 25
   }
-  return 20
+  return 15
 }
+
+function getAnsweredX(index: number) : number {
+  return 9*index+12
+}
+
+const getAnsweredY = 40;
+
 
 function getVoteX(index: number) : number {
   return getPlayerX(index) - 4
@@ -107,6 +123,21 @@ function getVoteX(index: number) : number {
 function getVoteY(index: number) : number {
   return getPlayerY(index) - 2
 }
+
+function getR(index: number, scores: number[]): number {
+    const maxScore = Math.max(...scores);
+    return maxScore > 0 ? (scores[index]/(Math.max(...scores))*2 + 1) : 2
+  }
+
+function getFakerText(faker: boolean): string {
+  if (faker) {
+    return "is the faker"
+  }
+  else {
+    return "is NOT the faker"
+  }
+}
+
 
 function GameDisplay() {
   const socket = useContext(SocketContext);
@@ -128,6 +159,18 @@ function GameDisplay() {
   const [totalVotes, setTotalVotes] = useState<number[]>([]);
   const [voteIndex, setVoteIndex] = useState<number>(-1);
   const [fakerIndex, setFakerIndex] = useState<number>(-1);
+  const [showFaker,setShowFaker] = useState<boolean>(false);
+  // const [pastChoices, setPastChoices] = useState<number[]>([]);
+  const [roundQuestions, setRoundQuestions] = useState<string[]>([]);
+  const [showPastQuestions,setShowPastQuestions] = useState<boolean>(false);
+  const [showScores,setShowScores] = useState<boolean>(false);
+  const [playerScores,setPlayerScores] = useState<number[]>([]);
+  const [playerPrevScores,setPlayerPrevScores] = useState<number[]>([]);
+  const [dispScores, setDispScores] = useState<boolean>(false);
+  const [fakerCaught, setFakerCaught] = useState<boolean>(false);
+  const [storedChoices,setStoredChoices] = useState<number[][]>([]);
+  const [votesNeeded,setVotesNeeded] = useState<number>(0);
+
   // const [playerTableHover, setPlayerTableHover] = useState<boolean>(false);
 
   const {state} = useLocation()
@@ -214,6 +257,7 @@ function GameDisplay() {
     //         }
     //   </g>
     // }
+  // function getIndexed()
 
   useEffect(() => {
     const handleGetNames = (playerArray: Player[]) => {
@@ -237,11 +281,18 @@ function GameDisplay() {
       setChoiceArray(gameState.choiceArray);
       // setFakerIndex(gameState.fakerIndex);
       setGameType(gameState.gameType);
+      setFakerCaught(gameState.fakerCaught);
       setPhase(gameState.phase);
       setQuestion(gameState.question);
       setTotalVotes(getTotalVotes(gameState.voteArray));
       setVoteIndex(gameState.votedIndex);
       setFakerIndex(gameState.fakerIndex);
+      setPlayerScores(gameState.playerArray.map(player => player.totalScore));
+      setPlayerPrevScores(gameState.playerArray.map(player => player.prevScore));
+      setStoredChoices(gameState.storedChoices);
+      // setPastChoices(gameState.pastChoices[gameState.gameType])
+      setRoundQuestions(gameState.roundQuestions);
+      setVotesNeeded(gameState.votesNeeded);
       // const thisPlayer = playerArray[thisId];
       // setPlayerHealth(playerArray.map(player => player.health));
       // setThisPlayer(thisPlayer);
@@ -270,6 +321,18 @@ function GameDisplay() {
       // socket.off("changeConnected",handleChangeConnected);
     }
   },[])
+
+  useEffect(() => {
+    if (phase == "scoring") {
+      if (fakerCaught) {
+        setShowPastQuestions(true);
+      }
+      else {
+        setShowFaker(true)
+        // setShowPastQuestions(true);
+      }
+    }
+  },[phase,fakerCaught])
   
   const gametypeOuterStyling: JSX.Element = useMemo(() => {
     const borderColor = getBorderColor(gameType, phase);
@@ -321,8 +384,8 @@ function GameDisplay() {
       if (val < 0) return <g key={index}></g>
       counts[val]++;
       return (<g key={index}>
-        <image href={pointImage} x={getPlayerX(val)+5} y={getPlayerY(val)+2*(counts[val]-1)} height={2} width={2}/>
-        <text x={getPlayerX(val)+7} y={getPlayerY(val)+ 2*(counts[val]-1)+1.75} fontSize={1.25}>{playerNames[index]}</text>
+        <image href={pointImage} x={getPlayerX(val)+6} y={getPlayerY(val)+2*(counts[val]-1)} height={2} width={2}/>
+        <text x={getPlayerX(val)+8.5} y={getPlayerY(val)-0.3+ 2*(counts[val]-1)+1.75} fontSize={1.25}>{playerNames[index]}</text>
       </g>)
 
     }))}
@@ -332,8 +395,8 @@ function GameDisplay() {
     choiceArray.map((val,index) => (
       val >= 0 ?
       <g key={index}>
-        <circle cx={getPlayerX(index) + 3} cy={getPlayerY(index)-2} r={1.5} fill="black"/>
-        <text x={getPlayerX(index)+2} y={getPlayerY(index)-2} fontSize={1} fill="white">{val}</text>
+        <circle cx={getPlayerX(index) + 6} cy={getPlayerY(index)+2} r={1.5} fill="black"/>
+        <text x={getPlayerX(index)+5.5} y={getPlayerY(index)+2.8} fontSize={2.5} fill="white">{val}</text>
       </g>
       : <g key={index}></g>
     ))
@@ -361,33 +424,323 @@ function GameDisplay() {
     return totalVotes.map((val,index) => 
       val > 0 ? 
       <g key={index}>
-        <image href={voteImage} x={getVoteX(index)} y={getVoteY(index)} height={4} width={4}></image>
-        <text x={getVoteX(index)+2} y={getVoteY(index)+2.5} fill="black" fontSize={2}>{val}</text>
+        <image href={voteImage} x={getVoteX(index)+4.5} y={getVoteY(index)-1} height={4} width={4}></image>
+        <text x={getVoteX(index)+6} y={getVoteY(index)-0.2} fill="black" fontSize={2}>{val}</text>
       </g>
       : null
     )
   },[totalVotes])
 
 
-  const revealImages = useMemo(() => {
+  // const revealImages = useMemo(() => {
+  //   if (voteIndex == -1) {
+  //     return <g>
+  //       <text x={30} y={20} fontSize={5}>Faker still lurks</text>
+  //     </g>
+  //   }
+  //   else {
+  //     if (voteIndex == fakerIndex) {
+  //       return <g>
+  //         <text x={30} y={20} fontSize={5}>{playerNames[voteIndex]} was the faker</text>
+  //       </g>
+  //     }
+  //       return <g>
+  //         <text x={30} y={20} fontSize={5}>{playerNames[voteIndex]} was not the faker</text>
+  //       </g>
+  //   }
+  // },[playerNames, voteIndex])
+  const doNothing = () => {
+
+  }
+
+  const sendRevealOver = () => {
+    socket.emit("revealOver",room)
+  }
+
+  const voteSuccessImage = useMemo(() => {
+    if (!playerNames[voteIndex]) {return null}
+    return <g>
+      <text x={getCenteredX(4,"Majority voted for".length)} y={10} fontSize={4}
+      fontFamily="Comic Sans MS"
+      >Majority voted for</text>
+      <motion.text
+        // x={45}
+        y={28}
+        initial={{
+          x: 50,
+          fontSize: 0,
+        }}
+        animate={{
+          x: getCenteredX(3,playerNames[voteIndex].length),
+          fontSize: 3,
+        }}
+        transition={{
+          delay: 1.5,
+          duration: 0.3,
+        }}
+      >
+        {playerNames[voteIndex]}
+      </motion.text>
+      <motion.image
+        href={peopleImagesRefs[voteIndex]}
+        initial={{
+          height: 0,
+          width: 0,
+          x: 50,
+          y: 20,
+        }}
+        animate={{
+          height:10,
+          width: 10,
+          x:45,
+          y: 15,
+        }}
+        transition={{
+          delay:1.5,
+          duration: 0.3,
+        }}
+
+      />
+      <motion.text
+        y = {40}
+        initial={{
+          fontSize: 0,
+          x: 50,
+          opacity: 0.99,
+        }}
+        animate={{
+          fontSize: 4,
+          x: getCenteredX(4,getFakerText(fakerCaught).length),
+          opacity:1,
+        }}
+        transition={{
+          fontSize: {delay: 4, duration:0.3},
+          x: {delay:4, duration: 0.3},
+          opacity: {delay:4, duration:2.5},
+          }}
+        onAnimationComplete={sendRevealOver}   
+      >
+        {getFakerText(fakerCaught)}
+      </motion.text>
+      {fakerCaught ? 
+      <motion.image 
+        href={jailImage}
+        height={20}
+        width={20}
+        x={40}
+        initial={{
+          y:-20
+        }}
+        animate={{
+          y:12
+        }}
+        transition={{
+          delay: 5,
+          duration: 0.5,
+        }}
+      /> 
+      : null}
+    </g>
+  },[fakerCaught,voteIndex])
+
+
+  const revealNoVote = useMemo(() => {
+    return <g>
+      <motion.image
+        href={fakerImage}
+        x={40}
+        y={10}
+        height={20}
+        width={20}
+        initial={{opacity: 0.999}}
+        animate={{opacity:1}}
+        transition={{duration: 3}}
+        onAnimationComplete={sendRevealOver}
+      />
+      <text
+      fontSize={4}
+      y={34}
+      x={getCenteredX(4,"Faker is still lurk".length)}
+      >
+        Faker is still lurking
+      </text>
+    </g>
+  },[])
+  // need to animate this somehow
+
+   const revealImages = useMemo(() => {
     if (voteIndex == -1) {
-      return <g>
-        <text x={30} y={20} fontSize={5}>Faker still lurks</text>
-      </g>
+      return revealNoVote
     }
     else {
-      if (voteIndex == fakerIndex) {
-        return <g>
-          <text x={30} y={20} fontSize={5}>{playerNames[voteIndex]} was the faker</text>
-        </g>
-      }
-        return <g>
-          <text x={30} y={20} fontSize={5}>{playerNames[voteIndex]} was not the faker</text>
-        </g>
+      return voteSuccessImage
     }
-  },[playerNames, voteIndex])
-  // const voteImages = 
-  // console.log(voteIndex)
+  },[playerNames,voteIndex, fakerCaught])
+
+
+  const goToShowPastScores = () => {
+    setShowFaker(false);
+    setShowPastQuestions(true);
+  }
+
+  const goToScoring = () => {
+    setShowPastQuestions(false);
+    setShowScores(true);
+  }
+
+  function finishScoring(index: number) {
+    if (index == 0) {
+      setShowScores(false);
+      setDispScores(false);
+      socket.emit("scoringAnimationOver",room);
+    }
+  }
+  
+
+  const showFakerImages = useMemo(() => {
+    return <g>
+      <motion.text x={40} y={15} fontSize={3}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 2 }}
+      >The faker was</motion.text>
+      <motion.text x={40} y={25} fontSize={5}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2, duration: 2 }}
+        onAnimationComplete={goToShowPastScores}
+      >{playerNames[fakerIndex]}</motion.text>
+    </g>
+  },[playerNames,fakerIndex])
+
+  const scoreText = (index: number) =>
+  dispScores ? playerScores[index] : playerPrevScores[index];
+
+
+  const showPastQuestionsImages = useMemo(() => {
+    const playerIndex: number[] = [];
+    let j = 0;
+    for (let i = 0; i < playerNames.length; i++) {
+      if (i != fakerIndex) {
+        playerIndex.push(j)
+        j++;
+      }
+      else {
+        playerIndex.push(-1);
+      }
+    }
+    // console.log(playerIndex)
+    // console.log(pastChoices);
+    // console.log(roundQuestions);
+    return <g>
+      <image href={fakerImage} x={4} y={getAnsweredY+1} height={5} width={5}/>
+      <text x={4} y={getAnsweredY} fontSize={1.5}>{playerNames[fakerIndex]}</text>
+      {/* {pastChoices.map()} */}
+      {roundQuestions.map((question, index) => 
+        <motion.g key={index} 
+          initial={{opacity:0}}
+          animate={{opacity:1}}
+          transition={{delay:5*index, duration:0.1}}
+        >
+          <text x={10} y={8+10*index} fontSize={1.5} fontWeight={"bold"}>Task #{index+1}</text>
+          <text x={10} y={10+10*index} fontSize={1.5}>{question}</text>
+        </motion.g>
+      )}
+      {playerNames.map((nameVal,index) => 
+        index != fakerIndex ? (
+          <g key={index}>
+            <text x={getAnsweredX(playerIndex[index])} y={getAnsweredY} fontSize={1.5}>{nameVal}</text>
+            {/* <circle cx={getAnsweredX(index)+1} cy={getAnsweredY+2} r={1}/>
+            <circle cx={getAnsweredX(index)+3} cy={getAnsweredY+2} r={1}/>
+            <circle cx={getAnsweredX(index)+5} cy={getAnsweredY+2} r={1}/> */}
+            <image href={fakerImage} x={getAnsweredX(playerIndex[index])} y={getAnsweredY+1} width={2} height={2} />
+            <image href={fakerImage} x={getAnsweredX(playerIndex[index])+2} y={getAnsweredY+1} width={2} height={2} />
+            <image href={fakerImage} x={getAnsweredX(playerIndex[index])+4} y={getAnsweredY+1} width={2} height={2} />
+            {storedChoices[index] && storedChoices[index].map((choice, index2) =>
+              <motion.image 
+                href={choice == fakerIndex ? greenCheckImage: redXImage}
+                x={getAnsweredX(playerIndex[index])+2*index2}
+                y={getAnsweredY+1}
+                initial={{height: 0, width:0,opacity:0.999}}
+                animate={{height:2, width:2, opacity:1}}
+                transition={{
+                  height: {delay: 2 + 5*index2, duration:0.2},
+                  width: {delay: 2 + 5*index2, duration:0.2},
+                  opacity: {delay: 5+ 5*index2, duration: 0.1}
+
+                }}
+
+                onAnimationComplete={index2 == storedChoices[index].length-1 ? goToScoring: doNothing}
+              />
+            )}
+
+          </g>
+        ) : (null)
+
+      )}
+    </g>
+  },[playerNames, fakerIndex,roundQuestions])
+
+  const showScoreImages = useMemo(() => {
+    return playerScores.map((_,index: number) => 
+      <g key={index}>
+        <motion.circle 
+          cx = {getPlayerX(index)+2.5}
+          cy = {getPlayerY(index)+2.5}
+          initial={{r: getR(index,playerPrevScores), 
+            opacity: 0.999,
+            // cx: getPlayerX(index)+getR(index,playerPrevScores),
+            // cy: getPlayerY(index)+getR(index,playerPrevScores),
+          }}
+          animate={{r: getR(index,playerScores),
+            opacity: 1,
+            // cx: getPlayerX(index) + getR(index,playerScores),
+            // cy: getPlayerY(index) + getR(index,playerScores),
+          }}
+          transition={{
+            r: {delay: 1, duration: 0.1},
+            // cx: {delay: 1, duration: 0.1},
+            // cy: {delay: 1, duration: 0.1},
+            opacity: {duration: 4},
+          }}
+          // onAnimationComplete={() => finishScoring(index)}
+        />
+        <motion.text
+          fill={"white"}
+          y = {getPlayerY(index)+3}
+          initial={{
+            x: getPlayerX(index)+3-getR(index,playerPrevScores),
+            fontSize: getR(index,playerPrevScores)
+          }}
+          animate={{
+            fontSize: getR(index,playerScores),
+            x: getPlayerX(index)+3-getR(index,playerScores),
+          }}
+          transition={{
+            fontSize: {delay: 1, duration: 0.1},
+            x: {delay: 1, duration: 0.1},
+            y: {delay: 1, duration: 0.1},
+          }}
+          onAnimationComplete={() => setDispScores(true)}
+        >{scoreText(index)}</motion.text>
+        <text x={getPlayerX(index)} y={getPlayerY(index)+7} fontSize={2}>{playerNames[index]}</text>
+      </g>
+    )
+  },[showScores,dispScores])
+
+  const scoringImages = useMemo(() => {
+    if (showFaker) {
+      return showFakerImages;
+    }
+    else if (showPastQuestions) {
+      return showPastQuestionsImages;
+    }
+    else if (showScores) {
+      return showScoreImages;
+    }
+    else {return <text y={10}>Neither</text>}
+    // else if (showPrevQ)
+  },[showFaker,showScores,showPastQuestions,dispScores,roundQuestions,fakerIndex,playerNames])
   
   return <svg id="main" x = "0px" y="0px" xmlns = "http://www.w3.org/2000/svg" viewBox="0 0 100 50">
       <g>
@@ -396,6 +749,7 @@ function GameDisplay() {
           {gametypeOuterStyling}
           <text className="text" x="3" y="6" fontSize="3">Phase: {phase}</text>
       </g>    
+      {/* <line x1={50} x2={50} y1={0} y2={50} fill={"black"} stroke="black" strokeWidth={0.2}></line> */}
       <g>
         {(() => {
           switch (phase) {
@@ -419,7 +773,7 @@ function GameDisplay() {
               </g>
             case "scoring":
               return <g>
-                {/* {scoringImages} */}
+                {scoringImages}
               </g>
           }
         })()}

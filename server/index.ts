@@ -6,7 +6,7 @@ import cors from "cors";
 import {ServerToClientEvents , ClientToServerEvents, Player, GameState, Phase, Loot, LootType, GameType, IDisplayFunction} from "../shared";
 import path from "path";
 import { readFileSync } from "fs";
-import { max } from 'd3';
+// import { max } from 'd3';
 
 const app = express()
 app.use(cors());
@@ -39,6 +39,10 @@ const ROOM_TIMEOUT= 10*1000*60; // 10 min timer
 const SELECTION_TIMER = 5*1000;
 const MAX_STORED_LENGTH = 10;
 
+const ANSWER_TIMER = 20*1000;
+const VOTE_TIMER = 60*1000;
+const CHOOSING_TIMER = 10*1000;
+
 
 const dataHands = readFileSync("../hands.txt", "utf-8");
 const handsTasks = dataHands.split("\n");
@@ -56,6 +60,10 @@ function resetChoiceArray(room: string) {
 
 function resetVoteArray(room: string) {
     games[room].voteArray = Array(games[room].playerArray.length).fill(-1);
+}
+
+function resetVoteLocks(room: string) {
+    games[room].voteLocked = Array(games[room].playerArray.length).fill(false);
 }
 
 function resetStoredChoices(room: string) {
@@ -82,8 +90,12 @@ function newGameState(type: boolean):GameState {
         choiceArray: [], 
         counter: 0, 
         voteArray: [],
+        voteLocked: [],
         storedChoices: [],
         votedIndex: -1,
+        fakerCaught: false,
+        roundQuestions: [],
+        votesNeeded: 0,
     };
 }
 
@@ -110,6 +122,10 @@ function updateStoredVotes(room: string) : void {
     for (let i = 0; i < games[room].voteArray.length; i++) {
         games[room].storedChoices[i].push(games[room].voteArray[i]);
     }
+}
+
+function updateRoundQuestions(room:string) : void {
+    games[room].roundQuestions.push(games[room].question);
 }
 
 
@@ -139,6 +155,24 @@ function getPrefix(type: GameType, phrase: string) : string {
                 return "Hold up as many fingers as "
             }
     }
+}
+
+function getQuestion(type: GameType, index: number) : string {
+    let file : string[] = [];
+    switch (type) {
+        case "hands":
+            file = handsTasks;
+            break;
+        case "point":
+            file = pointTasks;
+            break;
+        case "numbers":
+            file = numbersTasks;
+            break;
+    }   
+    const question = file[index];
+    return question
+
 }
 
 function getRandomQuestion(room: string, type: GameType) : string {
@@ -208,6 +242,9 @@ function calculateVotes(room: string) : void {
         }
     }
     games[room].votedIndex = determineVoteSuccess(out, votes.length);
+    if (games[room].votedIndex == games[room].fakerIndex) {
+        games[room].fakerCaught = true;
+    }
 }
 
 function determineVoteSuccess(totalVotes: number[], numPlayers: number) : number {
@@ -221,6 +258,11 @@ function determineVoteSuccess(totalVotes: number[], numPlayers: number) : number
         return -1
     }
 }
+
+function resetRoundQuestions(room: string): void {
+    games[room].roundQuestions = [];
+}
+
 
 const games : Record<string,GameState> = {};
 const gameTimers : Record<string,NodeJS.Timeout> = {}
@@ -399,8 +441,8 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         }
         else {
             // resetRoomTimeout(room, 1);
-            games[room].chooserIndex = getRandomPlayer(games[room].playerArray.length);
-            games[room].fakerIndex = getRandomPlayer(games[room].playerArray.length);
+            // games[room].chooserIndex = getRandomPlayer(games[room].playerArray.length);
+            // games[room].fakerIndex = getRandomPlayer(games[room].playerArray.length);
             // games[room].started = true;
             // games[room].joinable = false;
             // games[room].totalAlivePlayers = games[room].playerArray.length;
@@ -409,8 +451,12 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             // games[room].lootDict = getLootDict(games[room].lootDeck);
             resetChoiceArray(room);
             resetVoteArray(room);
+            resetVoteLocks(room);
             resetStoredChoices(room);
-            setTimer(room,changeToAnsweringAfterTimer)
+            resetRoundQuestions(room);
+            changeToChoosing(room);
+            games[room].votesNeeded = Math.ceil(0.65*games[room].playerArray.length)
+            // setTimer(room,changeToAnsweringAfterTimer,CHOOSING_TIMER)
             io.to(room).emit("startGame");
         }
     })
@@ -453,18 +499,21 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         const question : string = prefix + string
         games[room].question = question;
         games[room].phase = "answering";
-        games[room].fakerIndex = getRandomPlayer(games[room].playerArray.length);
     }
 
     // socket.on("set")
     socket.on("sendGameTypeDecision", (room: string, type: GameType) => {
         // need to get the question
         games[room].gameType = type;
-        prepForAnswering(room,type)
+        // REMOVE THE TIMER;
+        clearTimeout(gameTimers[room])
+        delete gameTimers[room];
+        changeToAnswering(room)
+        // prepForAnswering(room,type)
         //sends to the regular people in the room
-        io.to(room).emit("getGameState",games[room])
+        // io.to(room).emit("getGameState",games[room])
         // need to send out the question to each member in the regular game, including faker
-        setTimer(room, changeToVoting);
+        // setTimer(room, changeToVoting,ANSWER_TIMER)
     })
 
     socket.on("sendChoice",(room: string, id: number, index: number) => {
@@ -486,6 +535,10 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
     })
 
     socket.on("sendVote",(room: string, id: number, index: number) => {
+        if (!games[room]) {
+            socket.emit("failedToAccessRoom")
+            return
+        };
         games[room].voteArray[id] = index;
         // games[room].counter++;
         // socket.emit("")
@@ -493,6 +546,18 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         // if (games[room].counter == games[room].playerArray.length) {
         //     changeToReveal(room)
         // }
+    })
+
+    socket.on("lockInVote",(room: string, id: number) => {
+        if (!games[room]) {
+            socket.emit("failedToAccessRoom");
+            return
+        };
+        games[room].voteLocked[id] = true;
+        if (games[room].voteLocked.filter((locked) => locked==false).length == 0) {
+            changeToReveal(room);
+        }
+        io.to(games[room].displaySocket).emit("getGameState",games[room])
     })
     
 
@@ -511,7 +576,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         }
     })
 
-    function setTimer(room: string,input: IDisplayFunction) {
+    function setTimer(room: string,input: IDisplayFunction, timer: number) {
         if (!games[room]) return;
         clearTimeout(gameTimers[room])
         delete gameTimers[room];
@@ -527,21 +592,23 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
 
     function changeToChoosing(room: string) : void {
         if (!(games[room])) {
-            io.to(room).emit("failedToAccessRoom") 
+            socket.emit("failedToAccessRoom") 
             return
         }
         games[room].phase = "choosing"
         resetStoredChoices(room);
+        resetRoundQuestions(room);
+        games[room].fakerCaught = false;
         games[room].chooserIndex = getRandomPlayer(games[room].playerArray.length);
         games[room].fakerIndex = getRandomPlayer(games[room].playerArray.length);
         io.to(room).emit("getGameState",games[room])
-        setTimer(room,changeToAnsweringAfterTimer)
+        setTimer(room,changeToAnsweringAfterTimer,CHOOSING_TIMER) 
     }
 
     // function possibly
     function changeToAnswering(room: string) : void {
         if (!(games[room])) {
-            io.to(room).emit("failedToAccessRoom") 
+            socket.emit("failedToAccessRoom") 
             return
         }
         prepForAnswering(room,games[room].gameType)
@@ -549,54 +616,63 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         //sends to the regular people in the room
         io.to(room).emit("getGameState",games[room])
         // need to send out the question to each member in the regular game, including faker
-        setTimer(room, changeToVoting);
+
+        // setTimer(room, changeToVoting,ANSWER_TIMER);
     }
 
     function changeToAnsweringAfterTimer(room: string) : void {
         if (!(games[room])) {
-            io.to(room).emit("failedToAccessRoom") 
+            socket.emit("failedToAccessRoom") 
             return
         }
         games[room].phase = "answering"
         games[room].gameType = getRandomGameType();
         prepForAnswering(room,games[room].gameType)
         io.to(room).emit("getGameState",games[room])
-        setTimer(room,changeToVoting)
+        // setTimer(room,changeToVoting,ANSWER_TIMER)
     }
 
 
     function changeToVoting(room: string) : void {
         if (!(games[room])) {
-            io.to(room).emit("failedToAccessRoom") 
+            socket.emit("failedToAccessRoom") 
             return
         }
         games[room].counter = 0;
         setAllIncomplete(games[room].playerArray);
         games[room].phase = "voting"
         io.to(room).emit("getGameState",games[room])
-        setTimer(room,changeToReveal)
+        // setTimer(room,changeToReveal,VOTE_TIMER)
     }
 
     function changeToReveal(room: string) : void {
         if (!(games[room])) {
-            io.to(room).emit("failedToAccessRoom") 
+            socket.emit("failedToAccessRoom") 
             return
         }
         games[room].phase = "reveal";
+        games[room].round++;
         updateStoredVotes(room);
+        updateRoundQuestions(room);
         setAllIncomplete(games[room].playerArray);
         calculateVotes(room);
         io.to(room).emit("getGameState",games[room])
-        setTimer(room,revealOver)
+        // setTimer(room,revealOver,0)
+        // THIS NEEDS TO BE CHANGED, IT SHOULD NO LONGER BE BASED ON A TIMER BUT SHOULD INSTEAD BE BASED ON THE DISPLAY
     }
 
 
+    socket.on("revealOver", (room: string) => {
+        revealOver(room);
+    })
+
     function revealOver(room: string) : void {
         if (!(games[room])) {
-            io.to(room).emit("failedToAccessRoom") 
+            socket.emit("failedToAccessRoom") 
             return
         }
-        resetVoteArray(room)
+        resetVoteArray(room);
+        resetVoteLocks(room);
         resetChoiceArray(room);
         if ((games[room].storedChoices[0].length < 3) && (games[room].votedIndex != games[room].fakerIndex)) {
             changeToAnswering(room);
@@ -608,13 +684,14 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
 
     function changeToScoring(room: string): void {
         games[room].phase ="scoring";
-        io.to(games[room].displaySocket).emit("getGameState",games[room]);
+        calculateScores(room);
+        io.to(room).emit("getGameState",games[room]);
         // setTimer(room,changeToChoosing)
     }
 
     function changeToGameOver(room: string): void {
         if (!(games[room])) {
-            io.to(room).emit("failedToAccessRoom") 
+            socket.emit("failedToAccessRoom") 
             return
         }
         games[room].phase ="scoring";
@@ -624,15 +701,99 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
 
     socket.on("scoringAnimationOver", (room: string) => {
         if (!games[room]) {
-            io.to(room).emit("failedToAccessRoom")
+            socket.emit("failedToAccessRoom")
         }
-        if (true) {
-            changeToChoosing(room)
+        for(const player of games[room].playerArray) {
+            player.prevScore = player.totalScore;
+        }
+        if (games[room].round > 12) {
+            changeToGameOver(room);
         }
         else {
-            changeToGameOver(room)
+            changeToChoosing(room);
         }
     })
+
+    function calculateScores(room: string): void {
+        // const storedChoices = games[room].storedChoices
+        for (let i = 0; i < games[room].playerArray.length; i++) {
+            // const notVotedScore = 10*(games[room].playerArray.length-1) - 10*(games[room])
+            if (i == games[room].fakerIndex) {
+                games[room].playerArray[i].totalScore += calculateFakerScore(room,i)
+            }
+            else {
+                games[room].playerArray[i].totalScore += calculateNonFakerScore(room,i)
+            }
+        }
+    }
+
+    function calculateFakerScore(room: string,index: number): number {
+        const storedChoices = games[room].storedChoices;
+        let outNum = 300*storedChoices[0].length;
+        const votedFor = Array(storedChoices[0].length).fill(0);
+
+        for (let i = 0; i< storedChoices.length; i++) {
+            if (i == games[room].fakerIndex) {
+                continue;
+            }
+
+            for (let j = 0; j < storedChoices[0].length; j++) {
+                votedFor[j] += storedChoices[i][j] == games[room].fakerIndex ? 1 : 0;
+            }
+            
+            
+        }
+        for (let i = 0; i < votedFor.length; i++) {
+            if (i == votedFor.length-1 && games[room].fakerCaught) {
+                outNum -= 300;
+            }
+            else {
+                outNum -= 150*1/(games[room].playerArray.length-1)*votedFor[i];
+            }
+        }
+        return outNum
+    }
+
+    function calculateNonFakerScore(room: string,index: number): number {
+        const storedChoices = games[room].storedChoices;
+        let outNum = 20*(games[room].playerArray.length-2)*storedChoices[0].length;
+        const votedFor: number[] = Array(storedChoices[0].length).fill(0);
+        const successfullyVotedFor: boolean[] = Array(storedChoices[0].length).fill(false);
+        const correctVote : boolean[] = Array(storedChoices[0].length).fill(false);
+        for (let i = 0; i< storedChoices.length; i++) {
+            if (i == games[room].fakerIndex) {
+                continue;
+            }
+            // else if (i == index) {
+
+            //     continue;
+            // }
+            for (let j = 0; j < storedChoices[i].length; j++) {
+                if (storedChoices[i][j] == index) {
+                    votedFor[j]++;
+                }
+                if (i == index) {     
+                    correctVote[j]= storedChoices[i][j] == games[room].fakerIndex;
+                }
+            }
+        }
+
+        for (let i = 0; i < votedFor.length;i++) {
+            successfullyVotedFor[i] = votedFor[i]/(games[room].playerArray.length) > 0.65
+        }
+
+        for (let i= 0; i< successfullyVotedFor.length; i++) {
+            if (successfullyVotedFor[i]) {
+                outNum -= 20*(games[room].playerArray.length-2)
+            }
+            else {
+                outNum += correctVote[i] ? (games[room].fakerCaught ? 300 : 200): 0;
+            }
+        }
+
+
+        return outNum
+    }
 
     function sendToDisplay(room: string, type: GameType): void {
         // switch (type) {

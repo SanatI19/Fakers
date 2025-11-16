@@ -17,7 +17,22 @@
   width: 80%;
   font-size: 1.2rem;
   padding: 0.8rem;
+  border-radius: 1rem;
 }
+
+svg text {
+  font-family: "Comic Sans MS";
+  /* font-size: 20px; */
+  /* fill: black; */
+}
+
+/* .buttonGame {
+  font-size: 16px;      
+  padding: 12px 16px;  
+  border-radius: 8px;
+  min-width: 100px;
+  min-height: 44px; 
+} */
 
 .text {
   user-select: none;

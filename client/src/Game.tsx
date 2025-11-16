@@ -71,7 +71,8 @@ function Game() {
   const [phase, setPhase] = useState<Phase>("choosing");
   const [question, setQuestion] = useState<string>("");
   const [chooserIndex, setChooserIndex] = useState<number>(0);
-  const [voteIndex, setVoteIndex] = useState<number>(0);
+  const [voteIndex, setVoteIndex] = useState<number>(-1);
+  const [voteLocked,setVoteLocked] = useState<boolean>(false);
   // const [playerTableHover, setPlayerTableHover] = useState<boolean>(false);
 
   const {state} = useLocation()
@@ -118,6 +119,7 @@ function Game() {
         setQuestion(gameState.question);
         setCompletedPhase(gameState.playerArray[thisId].completedPhase)
         setVoteIndex(gameState.voteArray[thisId])
+        setVoteLocked(gameState.voteLocked[thisId])
       }
 
       const handleSocketDisconnect = () => {
@@ -174,6 +176,11 @@ function Game() {
     socket.emit("sendGameTypeDecision", room, type);
   }
 
+  const lockVote = () => {
+    setVoteLocked(true);
+    socket.emit("lockInVote",room,thisId)
+  }
+
   function questionChoiceButtons(type: GameType): JSX.Element {
     // const hands = [1,0];
     const numbers = [1,2,3,4,5];
@@ -199,11 +206,15 @@ function Game() {
   }
 
   const voteButtons = useMemo(() => {
-    return playerNames.map((name:string, index: number) => 
+    return <div>
+      {playerNames.map((name:string, index: number) => 
       index == thisId ? null :
-      <button key={`${index}-${voteIndex}`} className="buttonGame" disabled={voteIndex == index} style={{backgroundColor: voteIndex==index ? "green": "lightgrey", opacity: voteIndex==index ? 0.8 : 1}} onClick={() => sendVote(index)}>{name}</button>
-    )
-  },[playerNames,voteIndex])
+      <button key={`${index}-${voteIndex}`} className="buttonGame" disabled={voteIndex == index || voteLocked} style={{backgroundColor: voteIndex==index ? "green": "lightgrey", opacity: voteIndex==index ? 0.8 : 1}} onClick={() => sendVote(index)}>{name}</button>
+    )}
+      <br/>
+      <button className="buttonGame" disabled={voteLocked || voteIndex == -1} onClick={lockVote}>{"Lock vote"}</button>
+    </div>
+  },[playerNames,voteIndex,voteLocked])
 
   const gameTypeButtons: JSX.Element = (
     <>
