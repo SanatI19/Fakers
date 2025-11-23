@@ -14,6 +14,7 @@ export interface ServerToClientEvents {
     displayHands: () => void;
     displayNumbers: () => void;
     displayVotes: () => void;
+    // getTimer: (timer: number) => void;
     // sendChoiceToPlayer: (chooserIndex: number) => void;
     // revealPointDecisions: ()
     // list all of the server to client events here (so easy goddamn)
@@ -26,6 +27,7 @@ export interface ClientToServerEvents {
     requestPlayerArray: (room: string) => void;
     sendName: (name: string, id: number, room: string) => void;
     triggerStartGame: (room: string) => void;
+    triggerRestartGame: (room: string) => void;
     requestInitialState: (room: string, id: number) => void;
     requestGameState: (room: string) => void;
     sendBulletAndTarget: (bullet: number, targetId: number, id: number, room: string) => void;
@@ -51,6 +53,8 @@ export interface ClientToServerEvents {
     scoringAnimationOver: (room: string) => void;
     lockInVote: (room: string, id: number) => void;
     revealOver: (room: string) => void;
+    triggerEndGame: (room: string) => void;
+    // updateTimer: (room: string, timer: number) => void;
     // list all of the client to server events here 
 }
 
@@ -83,6 +87,7 @@ export interface GameState {
     fakerCaught: boolean;
     roundQuestions: string[];
     votesNeeded: number;
+    endTime: number;
 }
 
 export interface IDisplayFunction {
@@ -101,24 +106,6 @@ export class Player {
     // public playerId : number = 0;
     public name: string = "";
     public connected: boolean;
-    public blanks = 5;
-    public bullets = 3;
-    public pendingHits = 0;
-    public health = 3;
-    public dead = false;
-    //target of a bullet
-    public target = -1;
-    public bulletChoice = -1;
-    // public godfather = false;
-    public hiding = false;
-    public choosingLoot = false;
-    public damaged = false;
-    // public damaged = false;
-    // loot things
-    public money = 0;
-    public nft = 0;
-    public gems = 0;
-
     public completedPhase = false;
     public prevScore = 0;
     public totalScore = 0;

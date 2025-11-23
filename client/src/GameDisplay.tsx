@@ -24,6 +24,7 @@ const jailImage = "/images/jail.svg";
 const fakerImage = "/images/faker.svg";
 const redXImage = "/images/redX.svg";
 const greenCheckImage = "/images/greenCheck.svg";
+const starImage = "/images/star.svg";
 
 function getTotalVotes(votes: number[]) : number[] {
   const out =  Array(votes.length).fill(0);
@@ -35,22 +36,61 @@ function getTotalVotes(votes: number[]) : number[] {
   return out
 }
 
-function getBorderColor(type: GameType, phase: Phase) : string {
-  if (phase == "choosing") {
-    return "black"
-  }
-  if (phase == "reveal") {
-    return "purple"
-  }
+const gametypeImageRefs: Record<GameType,string> = {
+  "numbers": "/images/numbers.svg",
+  "hands": "/images/hands.svg",
+  "point": "/images/point.svg",
+}
+
+// function getBannerColor(type:GameType) : string {
+//     switch(type) {
+//     case "hands":
+//       return "orange"
+//     case "point":
+//       return "pink"
+//     case "numbers":
+//       return "cyan"
+//   }
+// }
+
+function getGameTypeString(type: GameType) : string {
   switch(type) {
     case "hands":
-      return "orange"
+      return "Lend a hand"
     case "point":
-      return "pink"
+      return "To the point"
     case "numbers":
-      return "cyan"
+      return "By the numbers"
   }
 }
+
+const gradients = [
+  { id: "lightgrey", start:"rgb(175, 175, 175)", end: "rgb(128, 128, 128)"},
+  { id: "tan", start:"rgb(250, 214, 166)", end: "rgb(210, 180, 140)"},
+  { id: "grey", start:"rgb(213, 213, 213)", end: "rgb(153, 153, 153)"},
+  { id: "orange", start:"rgb(227, 147, 61)", end: "rgb(228, 123, 11)"},
+  { id: "green", start: "rgb(103, 230, 105)", end: "rgb(49, 230, 52)" },
+  { id: "blue", start: "rgb(85, 198, 255)", end: "rgb(0, 166, 249)"},
+];
+
+function getBannerColor(type: GameType, phase: Phase) : string {
+  if (phase == "choosing" || phase == "gameover") {
+    return "url(#grey)"
+  }
+  // if (phase == "reveal") {
+  //   return "purple"
+  // }
+  switch(type) {
+    case "hands":
+      return "url(#orange)"
+    case "point":
+      return "url(#green)"
+    case "numbers":
+      return "url(#blue)"
+  }
+}
+
+// function getBannerFill(ty)
 
 function getCenteredX(font: number, length: number): number {
   const charWidth = font*0.5;
@@ -78,16 +118,16 @@ function getPlayerX(index: number) : number {
 
 function getPlayerY(index: number) : number {
   if (index >=5) {
-    return 25
+    return 28
   }
-  return 15
+  return 18
 }
 
 function getAnsweredX(index: number) : number {
   return 9*index+12
 }
 
-const getAnsweredY = 40;
+const getAnsweredY = 42;
 
 function getVoteX(index: number) : number {
   return getPlayerX(index) - 4
@@ -134,6 +174,10 @@ function GameDisplay() {
   const [fakerCaught, setFakerCaught] = useState<boolean>(false);
   const [storedChoices,setStoredChoices] = useState<number[][]>([]);
   const [votesNeeded,setVotesNeeded] = useState<number>(0);
+  const [showWinner,setShowWinner] = useState<boolean>(false);
+  const [endTime,setEndTime] = useState<number>(0);
+  const [remaining, setRemaining] = useState<number>(0);
+  const [chooserIndex, setChooserIndex] = useState<number>(0);
 
   const {state} = useLocation()
   const room = state.room;
@@ -168,7 +212,13 @@ function GameDisplay() {
       setStoredChoices(gameState.storedChoices);
       setRoundQuestions(gameState.roundQuestions);
       setVotesNeeded(gameState.votesNeeded);
+      setEndTime(gameState.endTime);
+      setChooserIndex(gameState.chooserIndex);
     }
+
+    // const handleGetTimer = (timer: number) => {
+    //   setTimerCount(timer);
+    // }
 
     const handleSocketDisconnect = () => {
       socket.emit("socketDisconnected",thisId,room)
@@ -178,12 +228,14 @@ function GameDisplay() {
     socket.on("getGameState",handleGetGameState);
     socket.on("disconnect",handleSocketDisconnect);
     socket.on("failedToAccessRoom", handleFailedToAccessRoom);
+    // socket.on("getTimer",handleGetTimer);
 
     return () => {
       socket.off("getPlayerNames",handleGetNames)
       socket.off("getGameState",handleGetGameState);
       socket.off("disconnect",handleSocketDisconnect);
       socket.off("failedToAccessRoom",handleFailedToAccessRoom);
+      // socket.off("getTimer",handleGetTimer);
     }
   },[])
 
@@ -196,14 +248,37 @@ function GameDisplay() {
         setShowFaker(true)
       }
     }
+    else if (phase == "gameover") {
+      setShowWinner(true)
+    }
   },[phase,fakerCaught])
   
-  const gametypeOuterStyling: JSX.Element = useMemo(() => {
-    const borderColor = getBorderColor(gameType, phase);
+  useEffect(() => {
+    if (!endTime) return;
+    // if (remaining)
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const diff = Math.max(0, endTime - now);
+      setRemaining(diff);
+    }, 1000); // Smooth updates
+
+    return () => clearInterval(interval);
+  }, [endTime]);
+
+  // const gametypeOuterStyling: JSX.Element = useMemo(() => {
+  //   // const borderColor = getBorderColor(gameType, phase);
+  //   return <g>
+  //     <rect x={0} y={0} height={50} width={100} fill={"none"} stroke={"black"} strokeWidth={1}/>
+  //   </g>
+  // },[gameType, phase])
+
+  const banners: JSX.Element = useMemo(() => {
     return <g>
-      <rect x={0} y={0} height={50} width={100} fill={"white"} stroke={borderColor} strokeWidth={5}/>
+      <rect filter="url(#shadow)" x={1} y={1} rx={2} ry={2} width={98} height={12} fill={getBannerColor(gameType,phase)}/>
+      <rect filter="url(#shadow)" x={1} y={39} rx={2} ry={2} width={98} height={10} fill={getBannerColor(gameType,phase)}/>
     </g>
-  },[gameType, phase])
+  },[gameType,phase])
 
   const questionText = useMemo(() => {
     return <text x={20} y={5} fontSize={2} fill="black">{question}</text>
@@ -293,6 +368,21 @@ function GameDisplay() {
   const sendRevealOver = () => {
     socket.emit("revealOver",room)
   }
+
+{/* <rect filter="url(#shadow)" ... /> */}
+
+  const timerImage = useMemo(() => {
+    if (remaining <= 0 || phase == "reveal" || phase == "scoring" || phase == "gameover") {
+      return null
+    }
+    return <g>
+      <circle cx={93} cy={44} fill="white" r={4} stroke="black" strokeWidth={0.2}/>
+      <text x={Math.ceil(remaining/1000) >=10 ? "90" : "92"} y={46} fontSize={5}>
+        {Math.ceil(remaining/1000)}
+      </text>
+
+    </g>
+  },[remaining, phase])
 
   const voteSuccessImage = useMemo(() => {
     if (!playerNames[voteIndex]) {return null}
@@ -386,7 +476,7 @@ function GameDisplay() {
       <motion.image
         href={fakerImage}
         x={40}
-        y={10}
+        y={13}
         height={20}
         width={20}
         initial={{opacity: 0.999}}
@@ -396,7 +486,7 @@ function GameDisplay() {
       />
       <text
       fontSize={4}
-      y={34}
+      y={38}
       x={getCenteredX(4,"Faker is still lurk".length)}
       >
         Faker is still lurking
@@ -450,6 +540,14 @@ function GameDisplay() {
   const scoreText = (index: number) =>
   dispScores ? playerScores[index] : playerPrevScores[index];
 
+  const votesNeededImage = useMemo(() => {
+    return <g>
+      <image href={starImage} x={1} y={1} width={12} height={12} fill="rgb(210, 243, 78)"/>
+      <text x={4.5} y={6} fontSize={0.8}>Votes needed</text>
+      <text x={6.5} y={8} fontSize={2}>{votesNeeded}</text>
+    </g>
+  },[votesNeeded])
+
   const showPastQuestionsImages = useMemo(() => {
     const playerIndex: number[] = [];
     let j = 0;
@@ -484,7 +582,7 @@ function GameDisplay() {
             <image href={fakerImage} x={getAnsweredX(playerIndex[index])+2} y={getAnsweredY+1} width={2} height={2} />
             <image href={fakerImage} x={getAnsweredX(playerIndex[index])+4} y={getAnsweredY+1} width={2} height={2} />
             {storedChoices[index] && storedChoices[index].map((choice, index2) =>
-              <motion.image 
+              <motion.image key={index2}
                 href={choice == fakerIndex ? greenCheckImage: redXImage}
                 x={getAnsweredX(playerIndex[index])+2*index2}
                 y={getAnsweredY+1}
@@ -529,10 +627,10 @@ function GameDisplay() {
           y = {getPlayerY(index)+3}
           initial={{
             x: getPlayerX(index)+3-getR(index,playerPrevScores),
-            fontSize: getR(index,playerPrevScores)
+            fontSize: getR(index,playerPrevScores)*0.6
           }}
           animate={{
-            fontSize: getR(index,playerScores),
+            fontSize: getR(index,playerScores)*0.6,
             x: getPlayerX(index)+3-getR(index,playerScores),
           }}
           transition={{
@@ -559,26 +657,155 @@ function GameDisplay() {
     }
     else {return <text y={10}>Neither</text>}
   },[showFaker,showScores,showPastQuestions,dispScores,roundQuestions,fakerIndex,playerNames])
+
+  const victoryScreen = useMemo(() => {
+    const winnerIndex: number = playerScores.indexOf(Math.max(...playerScores));
+    const winnerName: string = playerNames[winnerIndex];
+    if (!winnerIndex || !winnerName) return;
+    return <g>
+      <text x={getCenteredX(3,"The winner is".length)} y={8} fontSize={3}>The winner is</text>
+      <motion.text
+        // x={45}
+        y={28}
+        initial={{
+          x: 50,
+          fontSize: 0,
+        }}
+        animate={{
+          x: getCenteredX(3,winnerName.length),
+          fontSize: 3,
+        }}
+        transition={{
+          delay: 1.5,
+          duration: 0.3,
+        }}
+      >
+        {winnerName}
+      </motion.text>
+      <motion.image
+        href={peopleImagesRefs[winnerIndex]}
+        initial={{
+          height: 0,
+          width: 0,
+          x: 50,
+          y: 20,
+          opacity: 0.999,
+        }}
+        animate={{
+          height:10,
+          width: 10,
+          x:45,
+          y: 15,
+          opacity: 1,
+        }}
+        transition={{
+          height: {delay:1.5, duration: 0.3},
+          width: {delay:1.5,duration:0.3},
+          x: {delay:1.5,duration:0.3},
+          y: {delay:1.5,duration:0.3},
+          opacity: {delay:1.5,duration:3},
+        }}
+        onAnimationComplete={() => setShowWinner(false)}
+      />
+    </g>
+  },[playerScores,playerNames])
+
+  // const victoryScreen = useMemo(() => {
+  //   return <g>
+
+  //   </g>
+  // },[])
+  // console.log(phase)
+  // console.log(playerNames)
+  // console.log(playerArray)
+  // console.log(playerScores)
+  // console.log(playerImages.length)
+  // console.log()
+
+  console.log(phase)
+
+  const gameTypeImage = useMemo(() => {
+    return <g>
+      <image href={gametypeImageRefs[gameType]} x={5} y={2} height={5} width={5}/>
+      <text x={5} y={9} fontSize={3}>{getGameTypeString(gameType)}</text>
+    </g>
+  },[gameType])
+
+  const replayScreen = useMemo(() => {
+    return <g>
+      <text x={getCenteredX(3,`${playerNames[0]}, choose to replay or exit`.length)} y={5} fontSize={3}>{playerNames[0]}, choose to replay or exit</text>
+      {playerImages}
+      {playerScores.map((score,index) => {
+        return <g key={index}>
+          <text x={getPlayerX(index)+1} y={getPlayerY(index)-2} fontSize={3}>{score}</text>
+        </g>
+      })}
+    </g>
+  },[playerImages,playerScores,playerNames])
+
+  // setPhase("gameover")
+  // console.log(playerNames)
+
+  const chooserImage = useMemo(() => {
+    return <g>
+      <text x={20} y={10} fontSize={3}>{playerNames[chooserIndex]} is choosing a category</text>
+    </g>
+  },[playerNames,chooserIndex])
+
+  const gameOverImages = useMemo(() => {
+    return <g>
+      {showWinner ? victoryScreen : replayScreen}
+    </g>
+  },[showWinner,victoryScreen,replayScreen])
   
+
   return <svg id="main" x = "0px" y="0px" xmlns = "http://www.w3.org/2000/svg" viewBox="0 0 100 50">
+    <defs>
+      <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="0.5" stdDeviation="2" floodOpacity="0.3" />
+      </filter>
+      {/* <linearGradient id="tileGradient" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stopColor="rgb(173, 172, 172)" />
+        <stop offset="100%" stopColor="rgb(87, 87, 87)" />
+      </linearGradient> */}
+      {gradients.map(g => (
+      <linearGradient key={g.id} id={g.id} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor={g.start} />
+        <stop offset="100%" stopColor={g.end} />
+      </linearGradient>
+    ))}
+      {/* <filter id="noise">
+        <feTurbulence type="fractalNoise" baseFrequency="1" numOctaves={3} result="noise" />
+        <feColorMatrix type="saturate" values="0" colorInterpolationFilters="sRGB"/>
+        <feBlend in="SourceGraphic" in2="noise" mode="overlay" />
+      </filter> */}
+    </defs>
       <g>
-          <rect x="0" y="0" width="100" height={50} fill="white" stroke="black" strokeWidth={0.1}/>
-          <text className="text" x="1" y="3" fontSize="3">Round {round+1}</text>
-          {gametypeOuterStyling}
-          <text className="text" x="3" y="6" fontSize="3">Phase: {phase}</text>
+          <rect x="0" y="0" rx="2" ry="2" width="100" height={50} fill="url(#lightgrey)"
+          // stroke="black" strokeWidth={1}
+          />
+          {/* <text className="text" x="1" y="3" fontSize="3">Round {round+1}</text> */}
+          {banners}
+          {/* {gametypeOuterStyling} */}
+          {/* <text className="text" x="3" y="6" fontSize="3">Phase: {phase}</text> */}
+          {timerImage}
       </g>    
       <g>
         {(() => {
           switch (phase) {
             case "choosing":
-              return <g> </g>
+              return <g> 
+                {chooserImage}
+              </g>
             case "answering":
               return <g>
+                {gameTypeImage}
                 {playerImages}
                 </g>
             case "voting":
               return <g> 
                 {questionText}
+                {votesNeededImage}
                 {answerImages(gameType)}
                 {voteImages}
               </g>
@@ -589,6 +816,10 @@ function GameDisplay() {
             case "scoring":
               return <g>
                 {scoringImages}
+              </g>
+            case "gameover":
+              return <g>
+                {gameOverImages}
               </g>
           }
         })()}

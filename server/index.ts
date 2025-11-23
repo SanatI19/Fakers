@@ -35,9 +35,10 @@ server.listen(PORT, () => {
 
 const roomCodeLength = 4;
 const maxPlayers = 8;
-const ROOM_TIMEOUT= 10*1000*60; // 10 min timer
+const ROOM_TIMEOUT= 5*1000*60*60; // 5 min timer
 const SELECTION_TIMER = 5*1000;
 const MAX_STORED_LENGTH = 10;
+const MAX_ROUNDS = 2;
 
 const ANSWER_TIMER = 20*1000;
 const VOTE_TIMER = 60*1000;
@@ -96,26 +97,41 @@ function newGameState(type: boolean):GameState {
         fakerCaught: false,
         roundQuestions: [],
         votesNeeded: 0,
+        endTime: 0,
     };
 }
 
-function initGameTimer(roomId: string) {
-    gameTimers[roomId] = setTimeout(() => deleteRoom(roomId), 5*ROOM_TIMEOUT);
-}
+// function initGameTimer(roomId: string) {
+//     gameTimers[roomId] = setTimeout(() => deleteRoom(roomId), 5*ROOM_TIMEOUT);
+// }
 
 function resetRoomTimeout(room: string, multiplier: number) {
   if (!room) return;
-  clearTimeout(gameTimers[room]);
+  clearTimeout(gameoverTimers[room]);
 //   console.log(gameTimers[room])
-    delete gameTimers[room];
-  gameTimers[room] = setTimeout(() => deleteRoom(room), multiplier* ROOM_TIMEOUT);
+  delete gameoverTimers[room];
+  gameoverTimers[room] = setTimeout(() => deleteRoom(room), multiplier* ROOM_TIMEOUT);
 //   console.log("New game timers")
 //   console.log(gameTimers[room])
 }
 
+// function setGameoverTimer(room: string) {
+//     if (!games[room]){
+
+//         return;
+//     }
+//     clearTimeout(gameoverTimers[room])
+//     gameTimers[room] = setTimeout(() => deleteRoom(room),ROOM_TIMEOUT);
+// }
+
 function deleteRoom(room: string) {
-  if (games[room]) { clearTimeout(gameTimers[room]) };
-  delete games[room];
+    if (games[room]) { 
+        clearTimeout(gameoverTimers[room]) 
+        delete gameoverTimers[room]
+    };
+
+    io.to(room).emit("failedToAccessRoom");
+    delete games[room];
 }
 
 function updateStoredVotes(room: string) : void {
@@ -149,7 +165,7 @@ function getPrefix(type: GameType, phrase: string) : string {
             return "Point at the player who "
         case "numbers":
             if (phrase[phrase.length-1] == "0"){
-                return "On a scale of 1-5, "
+                return "On a scale of 0-5, "
             }
             else {
                 return "Hold up as many fingers as "
@@ -263,9 +279,27 @@ function resetRoundQuestions(room: string): void {
     games[room].roundQuestions = [];
 }
 
+function resetPlayers(room: string) : void {
+    if (!games[room]) {
+        return;
+    }
+    for (const player of games[room].playerArray) {
+        player.prevScore = 0;
+        player.totalScore = 0;
+    }
+}
+
+function removeTimers(room:string) : void {
+    // console.log(gameTimers[room])
+    clearTimeout(gameTimers[room])
+    delete gameTimers[room];
+    // console.log(gameTimers[room])
+}
+
 
 const games : Record<string,GameState> = {};
 const gameTimers : Record<string,NodeJS.Timeout> = {}
+const gameoverTimers : Record<string,NodeJS.Timeout> = {}
 const socketToRoom : Record<string,string> = {};
 
 io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) => {
@@ -436,20 +470,38 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
     })
 
     socket.on("triggerStartGame",(room: string) => {
-        if (games[room] === undefined) {
+        if (!games[room]) {
             socket.emit("failedToAccessRoom");
+            return;
         }
-        else {
-            resetChoiceArray(room);
-            resetVoteArray(room);
-            resetVoteLocks(room);
-            resetStoredChoices(room);
-            resetRoundQuestions(room);
-            changeToChoosing(room);
-            games[room].votesNeeded = Math.ceil(0.65*games[room].playerArray.length)
-            io.to(room).emit("startGame");
-        }
+        resetGame(room);
+        io.to(room).emit("startGame");
     })
+
+    socket.on("triggerRestartGame", (room: string) => {
+        if (!games[room]) {
+            socket.emit("failedToAccessRoom");
+            return;
+        }
+        resetGame(room);
+        io.to(room).emit("getGameState",games[room]);
+    })
+
+    function resetGame(room: string) : void {
+        if (!games[room]) {
+            socket.emit("failedToAccessRoom");
+            return;
+        }
+        resetPlayers(room);
+        resetChoiceArray(room);
+        resetVoteArray(room);
+        resetVoteLocks(room);
+        resetStoredChoices(room);
+        resetRoundQuestions(room);
+        changeToChoosing(room);
+        resetRoomTimeout(room,1);
+        games[room].votesNeeded = Math.ceil(0.65*games[room].playerArray.length)
+    }
 
     socket.on("requestInitialState",(room: string, id: number) => {
         if (games[room] !== undefined) {  
@@ -536,6 +588,15 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         io.to(games[room].displaySocket).emit("getGameState",games[room])
     })
     
+    socket.on("triggerEndGame", (room: string) => {
+        deleteRoom(room);
+    })
+
+    function setCountdown(room: string, timer: number) {
+        const endTime = Date.now() + timer;
+        games[room].endTime = endTime;
+    }
+
 
     socket.on("disconnect", (reason) => {
         const roomId = socketToRoom[socket.id];
@@ -548,11 +609,19 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         }
     })
 
+    // socket.on("updateTimer",(room: string, timer: number) => {
+    //     if (!games[room]) {
+    //         socket.emit("failedToAccessRoom");
+    //         return;
+    //     }
+    //     games[room].timerCount = timer;
+    //     socket.emit("getTimer",games[room].timerCount);
+    // })
+
     function setTimer(room: string,input: IDisplayFunction, timer: number) {
         if (!games[room]) return;
-        clearTimeout(gameTimers[room])
-        delete gameTimers[room];
-        gameTimers[room] = setTimeout(() => input(room), SELECTION_TIMER);
+        removeTimers(room);
+        gameTimers[room] = setTimeout(() => input(room), timer);
     }
 
     function changeToChoosing(room: string) : void {
@@ -560,12 +629,15 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom") 
             return
         }
+        console.log("choosing")
         games[room].phase = "choosing"
+        resetRoomTimeout(room,1);
         resetStoredChoices(room);
         resetRoundQuestions(room);
         games[room].fakerCaught = false;
         games[room].chooserIndex = getRandomPlayer(games[room].playerArray.length);
         games[room].fakerIndex = getRandomPlayer(games[room].playerArray.length);
+        setCountdown(room,CHOOSING_TIMER);
         io.to(room).emit("getGameState",games[room])
         setTimer(room,changeToAnsweringAfterTimer,CHOOSING_TIMER) 
     }
@@ -575,7 +647,10 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom") 
             return
         }
+        console.log("answering")
         prepForAnswering(room,games[room].gameType)
+        resetRoomTimeout(room,1);
+        setCountdown(room,ANSWER_TIMER);
         io.to(room).emit("getGameState",games[room])
         setTimer(room, changeToVoting,ANSWER_TIMER);
     }
@@ -585,9 +660,12 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom") 
             return
         }
+        console.log("answering");
+        resetRoomTimeout(room,1);
         games[room].phase = "answering"
         games[room].gameType = getRandomGameType();
         prepForAnswering(room,games[room].gameType)
+        setCountdown(room,ANSWER_TIMER);
         io.to(room).emit("getGameState",games[room])
         setTimer(room,changeToVoting,ANSWER_TIMER)
     }
@@ -598,9 +676,12 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom") 
             return
         }
+        console.log("voting")
+        resetRoomTimeout(room,1);
         games[room].counter = 0;
         setAllIncomplete(games[room].playerArray);
-        games[room].phase = "voting"
+        games[room].phase = "voting";
+        setCountdown(room,VOTE_TIMER);
         io.to(room).emit("getGameState",games[room])
         setTimer(room,changeToReveal,VOTE_TIMER)
     }
@@ -610,9 +691,12 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom") 
             return
         }
+        console.log("reveal")
+        resetRoomTimeout(room,1);
         games[room].phase = "reveal";
         games[room].round++;
         updateStoredVotes(room);
+        removeTimers(room);
         updateRoundQuestions(room);
         setAllIncomplete(games[room].playerArray);
         calculateVotes(room);
@@ -642,9 +726,11 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
     }
 
     function changeToScoring(room: string): void {
+        resetRoomTimeout(room,1);
         games[room].phase ="scoring";
         calculateScores(room);
         io.to(room).emit("getGameState",games[room]);
+        removeTimers(room);
         // setTimer(room,changeToChoosing)
     }
 
@@ -654,7 +740,11 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             return
         }
         games[room].phase ="gameover";
+
+        console.log("GAME OVER")
         io.to(room).emit("getGameState",games[room]);
+        removeTimers(room);
+        resetRoomTimeout(room,1);
         // setTimer(room,changeToChoosing)
     }
 
@@ -665,7 +755,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         for(const player of games[room].playerArray) {
             player.prevScore = player.totalScore;
         }
-        if (games[room].round > 12) {
+        if (games[room].round > MAX_ROUNDS) {
             changeToGameOver(room);
         }
         else {

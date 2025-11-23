@@ -8,6 +8,17 @@ import "./App.css";
 
 const fakerText = "You are the faker, pick something random"
 
+function getGameTypeString(type: GameType) : string {
+  switch(type) {
+    case "hands":
+      return "Lend a hand"
+    case "point":
+      return "To the point"
+    case "numbers":
+      return "By the numbers"
+  }
+}
+
 function Game() {
   const socket = useContext(SocketContext);
   const navigate = useNavigate();
@@ -89,7 +100,7 @@ function Game() {
   }
 
   function questionChoiceButtons(type: GameType): JSX.Element {
-    const numbers = [1,2,3,4,5];
+    const numbers = [0,1,2,3,4,5];
     switch (type) {
       case "hands":
         return <g>
@@ -124,9 +135,9 @@ function Game() {
 
   const gameTypeButtons: JSX.Element = (
     <>
-      <button className="buttonGame" onClick={() => sendGameChoice("hands")}>Hands</button>
-      <button className="buttonGame" onClick={() => sendGameChoice("numbers")}>Numbers</button>
-      <button className="buttonGame" onClick={() => sendGameChoice("point")}>Pointing</button>
+      <button className="buttonGame" onClick={() => sendGameChoice("hands")}>{getGameTypeString("hands")}</button>
+      <button className="buttonGame" onClick={() => sendGameChoice("numbers")}>{getGameTypeString("numbers")}</button>
+      <button className="buttonGame" onClick={() => sendGameChoice("point")}>{getGameTypeString("point")}</button>
     </>
   )
 
@@ -155,6 +166,13 @@ function Game() {
         <>
           <p className="textGame">Vote for who you think is faking</p>
           {voteButtons}
+        </>
+      )}
+
+      {phase === "gameover" && thisId == 0 && (
+        <>
+          <button className="buttonGame" onClick={() => socket.emit("triggerStartGame",room)}>Play again</button>
+          <button className="buttonGame" onClick={() => socket.emit("triggerEndGame",room)}>Exit</button>
         </>
       )}
     </div>
