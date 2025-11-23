@@ -12,12 +12,10 @@ function PreGameDisplay() {
   const [playerArray, setPlayerArray] = useState<Player[]>([]);
   const {state} = useLocation()
   const room = state.room;
-  console.log(room)
   let playerId : string;
   let deviceId : string;
 
   function removePlayer(index: number) {
-    console.log(`Removing player: ${index}`)
     socket.emit("requestRemovePlayer", room, index);
   }
 
@@ -46,7 +44,6 @@ function PreGameDisplay() {
       }
 
       const handleRemovePlayerFromLobby = (index: number, playerArray: Player[]) => {
-        console.log(index)
         setPlayerArray(playerArray);
         if (thisId == index) {
           navigate(`/`);

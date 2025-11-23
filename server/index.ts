@@ -6,11 +6,9 @@ import cors from "cors";
 import {ServerToClientEvents , ClientToServerEvents, Player, GameState, Phase, Loot, LootType, GameType, IDisplayFunction} from "../shared";
 import path from "path";
 import { readFileSync } from "fs";
-// import { max } from 'd3';
 
 const app = express()
 app.use(cors());
-
 
 app.use(express.static(path.join(__dirname, "../../../client/dist"))); 
 app.get("/*path", (req, res) => {
@@ -34,16 +32,14 @@ server.listen(PORT, () => {
 
 
 const roomCodeLength = 4;
-const maxPlayers = 8;
+const MAX_PLAYERS = 10;
 const ROOM_TIMEOUT= 5*1000*60*60; // 5 min timer
-const SELECTION_TIMER = 5*1000;
 const MAX_STORED_LENGTH = 10;
 const MAX_ROUNDS = 2;
 
 const ANSWER_TIMER = 20*1000;
 const VOTE_TIMER = 60*1000;
 const CHOOSING_TIMER = 10*1000;
-
 
 const dataHands = readFileSync("../hands.txt", "utf-8");
 const handsTasks = dataHands.split("\n");
@@ -53,7 +49,6 @@ const pointTasks = dataPoint.split("\n");
 
 const dataNumbers = readFileSync("../numbers.txt", "utf-8");
 const numbersTasks = dataNumbers.split("\n");
-
 
 function resetChoiceArray(room: string) {
     games[room].choiceArray = Array(games[room].playerArray.length).fill(-1);
@@ -70,7 +65,6 @@ function resetVoteLocks(room: string) {
 function resetStoredChoices(room: string) {
     games[room].storedChoices = Array.from({ length: games[room].playerArray.length }, () => []);
 }
-
 
 function newGameState(type: boolean):GameState {
     const playerArray : Player[] = []
@@ -101,28 +95,12 @@ function newGameState(type: boolean):GameState {
     };
 }
 
-// function initGameTimer(roomId: string) {
-//     gameTimers[roomId] = setTimeout(() => deleteRoom(roomId), 5*ROOM_TIMEOUT);
-// }
-
 function resetRoomTimeout(room: string, multiplier: number) {
   if (!room) return;
   clearTimeout(gameoverTimers[room]);
-//   console.log(gameTimers[room])
   delete gameoverTimers[room];
   gameoverTimers[room] = setTimeout(() => deleteRoom(room), multiplier* ROOM_TIMEOUT);
-//   console.log("New game timers")
-//   console.log(gameTimers[room])
 }
-
-// function setGameoverTimer(room: string) {
-//     if (!games[room]){
-
-//         return;
-//     }
-//     clearTimeout(gameoverTimers[room])
-//     gameTimers[room] = setTimeout(() => deleteRoom(room),ROOM_TIMEOUT);
-// }
 
 function deleteRoom(room: string) {
     if (games[room]) { 
@@ -143,8 +121,6 @@ function updateStoredVotes(room: string) : void {
 function updateRoundQuestions(room:string) : void {
     games[room].roundQuestions.push(games[room].question);
 }
-
-
 
 function generateRoomCode(): string {
     let result = '';
@@ -173,24 +149,6 @@ function getPrefix(type: GameType, phrase: string) : string {
     }
 }
 
-function getQuestion(type: GameType, index: number) : string {
-    let file : string[] = [];
-    switch (type) {
-        case "hands":
-            file = handsTasks;
-            break;
-        case "point":
-            file = pointTasks;
-            break;
-        case "numbers":
-            file = numbersTasks;
-            break;
-    }   
-    const question = file[index];
-    return question
-
-}
-
 function getRandomQuestion(room: string, type: GameType) : string {
     let file : string[] = [];
     switch (type) {
@@ -211,9 +169,6 @@ function getRandomQuestion(room: string, type: GameType) : string {
 
 function randomizeChoice(room: string, type: GameType, file: string[]): string {
     let index = Math.floor(Math.random()*file.length);
-    // if (!games[room].pastChoices[type]) {
-    //     games[room].pastChoices[type] = [index];
-    // }
     if (games[room].pastChoices[type].includes(index)) {
         return randomizeChoice(room,type,file);
     }
@@ -265,8 +220,6 @@ function calculateVotes(room: string) : void {
 
 function determineVoteSuccess(totalVotes: number[], numPlayers: number) : number {
     const maxVotes = Math.max(...totalVotes);
-    // const indexMax = totalVotes.indexOf(maxVotes);
-
     if (maxVotes / numPlayers > 0.65) {
         return totalVotes.indexOf(maxVotes);
     }
@@ -290,10 +243,8 @@ function resetPlayers(room: string) : void {
 }
 
 function removeTimers(room:string) : void {
-    // console.log(gameTimers[room])
     clearTimeout(gameTimers[room])
     delete gameTimers[room];
-    // console.log(gameTimers[room])
 }
 
 
@@ -312,7 +263,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         let reason = "";
         let id = -1;
         if (games[room] !== undefined && games[room].joinable) {
-            // do some putting of the players in the array
             socket.join(room);
             socketToRoom[socket.id] = room;
             outRoom = room;
@@ -356,10 +306,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.join(roomId);
             socketToRoom[socket.id] = roomId;
             games[roomId] = newGameState(type);
-            // initGameTimer(roomId);
-            // if (games[])
             games[roomId].sockets.push(socket.id);
-            // if (games)
             socket.emit("enterExistingRoom",roomId,"display", -1);
         }
         else {
@@ -383,19 +330,15 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].displaySocket = socket.id;
     })
 
-
     socket.on("joinPlayerArray",(room: string, deviceId: string, playerId: string) => {
         if (games[room] === undefined) {
             socket.emit("failedToAccessRoom")
         }
         else {
-            // resetRoomTimeout(room, 1)
             socket.join(room)
             socketToRoom[socket.id] = room;
-
             const playerArray = games[room].playerArray;
             const playerIds = playerArray.map(player => player.internalId);
-            const deviceIds = playerArray.map(player => player.deviceId);
             let index = 0;
             if (playerIds.includes(playerId)) {
                 index = playerIds.indexOf(playerId)
@@ -432,15 +375,13 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
                     index = playerArray.length;
                     const name = "Player" + (index+1);
                     playerArray.push(new Player(name,deviceId, playerId))
-                    // playerArray[index].id = index;
                     games[room].sockets[index] = socket.id;
                     socket.emit("getPlayerIndex",index);
                     io.to(room).emit("sendPlayerArray",playerArray);
                 }
             }
-            if (playerArray.length == 8) {
+            if (playerArray.length == MAX_PLAYERS) {
                 games[room].joinable = false;
-                // need to add something to fix potential race condition
             }
         }
     })
@@ -450,7 +391,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom");
         }
         else {
-            // resetRoomTimeout(room, 1);
             const playerArray = games[room].playerArray;
             playerArray.splice(index,1);
             io.to(room).emit("removePlayerFromLobby", index, playerArray);
@@ -463,7 +403,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom");
         }
         else {
-            // resetRoomTimeout(room,1);
             games[room].playerArray[id].name = name;
             io.to(room).emit("sendPlayerArray",games[room].playerArray);
         }
@@ -597,7 +536,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].endTime = endTime;
     }
 
-
     socket.on("disconnect", (reason) => {
         const roomId = socketToRoom[socket.id];
         if (roomId !== undefined && games[roomId] !== undefined) {
@@ -608,15 +546,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             }
         }
     })
-
-    // socket.on("updateTimer",(room: string, timer: number) => {
-    //     if (!games[room]) {
-    //         socket.emit("failedToAccessRoom");
-    //         return;
-    //     }
-    //     games[room].timerCount = timer;
-    //     socket.emit("getTimer",games[room].timerCount);
-    // })
 
     function setTimer(room: string,input: IDisplayFunction, timer: number) {
         if (!games[room]) return;
@@ -629,7 +558,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom") 
             return
         }
-        console.log("choosing")
         games[room].phase = "choosing"
         resetRoomTimeout(room,1);
         resetStoredChoices(room);
@@ -647,7 +575,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom") 
             return
         }
-        console.log("answering")
         prepForAnswering(room,games[room].gameType)
         resetRoomTimeout(room,1);
         setCountdown(room,ANSWER_TIMER);
@@ -660,7 +587,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom") 
             return
         }
-        console.log("answering");
         resetRoomTimeout(room,1);
         games[room].phase = "answering"
         games[room].gameType = getRandomGameType();
@@ -676,7 +602,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom") 
             return
         }
-        console.log("voting")
         resetRoomTimeout(room,1);
         games[room].counter = 0;
         setAllIncomplete(games[room].playerArray);
@@ -691,7 +616,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom") 
             return
         }
-        console.log("reveal")
         resetRoomTimeout(room,1);
         games[room].phase = "reveal";
         games[room].round++;
@@ -701,8 +625,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         setAllIncomplete(games[room].playerArray);
         calculateVotes(room);
         io.to(room).emit("getGameState",games[room])
-        // setTimer(room,revealOver,0)
-        // THIS NEEDS TO BE CHANGED, IT SHOULD NO LONGER BE BASED ON A TIMER BUT SHOULD INSTEAD BE BASED ON THE DISPLAY
     }
 
     socket.on("revealOver", (room: string) => {
@@ -731,7 +653,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         calculateScores(room);
         io.to(room).emit("getGameState",games[room]);
         removeTimers(room);
-        // setTimer(room,changeToChoosing)
     }
 
     function changeToGameOver(room: string): void {
@@ -745,7 +666,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         io.to(room).emit("getGameState",games[room]);
         removeTimers(room);
         resetRoomTimeout(room,1);
-        // setTimer(room,changeToChoosing)
     }
 
     socket.on("scoringAnimationOver", (room: string) => {
@@ -830,7 +750,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
                 outNum += correctVote[i] ? (games[room].fakerCaught ? 300 : 200): 0;
             }
         }
-
         return outNum
     }
 })

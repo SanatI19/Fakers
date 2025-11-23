@@ -42,17 +42,6 @@ const gametypeImageRefs: Record<GameType,string> = {
   "point": "/images/point.svg",
 }
 
-// function getBannerColor(type:GameType) : string {
-//     switch(type) {
-//     case "hands":
-//       return "orange"
-//     case "point":
-//       return "pink"
-//     case "numbers":
-//       return "cyan"
-//   }
-// }
-
 function getGameTypeString(type: GameType) : string {
   switch(type) {
     case "hands":
@@ -89,8 +78,6 @@ function getBannerColor(type: GameType, phase: Phase) : string {
       return "url(#blue)"
   }
 }
-
-// function getBannerFill(ty)
 
 function getCenteredX(font: number, length: number): number {
   const charWidth = font*0.5;
@@ -156,7 +143,6 @@ function GameDisplay() {
   const navigate = useNavigate();
   const [playerNames,setPlayerNames] = useState<string[]>([""]);
   const [playerArray, setPlayerArray] = useState<Player[]>([]);
-  const [round, setRound] = useState<number>(0);
   const [choiceArray, setChoiceArray] = useState<number[]>(Array(8).fill(-1))
   const [gameType, setGameType] = useState<GameType>("hands");
   const [phase, setPhase] = useState<Phase>("choosing");
@@ -197,7 +183,6 @@ function GameDisplay() {
     }
 
     const handleGetGameState = (gameState: GameState)  => {
-      setRound(gameState.round);
       setPlayerArray(gameState.playerArray);
       setChoiceArray(gameState.choiceArray);
       setGameType(gameState.gameType);
@@ -216,10 +201,6 @@ function GameDisplay() {
       setChooserIndex(gameState.chooserIndex);
     }
 
-    // const handleGetTimer = (timer: number) => {
-    //   setTimerCount(timer);
-    // }
-
     const handleSocketDisconnect = () => {
       socket.emit("socketDisconnected",thisId,room)
     }
@@ -228,14 +209,12 @@ function GameDisplay() {
     socket.on("getGameState",handleGetGameState);
     socket.on("disconnect",handleSocketDisconnect);
     socket.on("failedToAccessRoom", handleFailedToAccessRoom);
-    // socket.on("getTimer",handleGetTimer);
 
     return () => {
       socket.off("getPlayerNames",handleGetNames)
       socket.off("getGameState",handleGetGameState);
       socket.off("disconnect",handleSocketDisconnect);
       socket.off("failedToAccessRoom",handleFailedToAccessRoom);
-      // socket.off("getTimer",handleGetTimer);
     }
   },[])
 
@@ -254,9 +233,7 @@ function GameDisplay() {
   },[phase,fakerCaught])
   
   useEffect(() => {
-    if (!endTime) return;
-    // if (remaining)
-
+    if (!endTime || phase == "scoring" || phase == "gameover" || phase == "reveal") return;
     const interval = setInterval(() => {
       const now = Date.now();
       const diff = Math.max(0, endTime - now);
@@ -265,13 +242,6 @@ function GameDisplay() {
 
     return () => clearInterval(interval);
   }, [endTime]);
-
-  // const gametypeOuterStyling: JSX.Element = useMemo(() => {
-  //   // const borderColor = getBorderColor(gameType, phase);
-  //   return <g>
-  //     <rect x={0} y={0} height={50} width={100} fill={"none"} stroke={"black"} strokeWidth={1}/>
-  //   </g>
-  // },[gameType, phase])
 
   const banners: JSX.Element = useMemo(() => {
     return <g>
@@ -317,7 +287,6 @@ function GameDisplay() {
         <image href={pointImage} x={getPlayerX(val)+6} y={getPlayerY(val)+2*(counts[val]-1)} height={2} width={2}/>
         <text x={getPlayerX(val)+8.5} y={getPlayerY(val)-0.3+ 2*(counts[val]-1)+1.75} fontSize={1.25}>{playerNames[index]}</text>
       </g>)
-
     }))}
   ,[choiceArray,playerNames])
 
@@ -361,15 +330,11 @@ function GameDisplay() {
     )
   },[totalVotes])
 
-  const doNothing = () => {
-
-  }
+  const doNothing = () => {}
 
   const sendRevealOver = () => {
     socket.emit("revealOver",room)
   }
-
-{/* <rect filter="url(#shadow)" ... /> */}
 
   const timerImage = useMemo(() => {
     if (remaining <= 0 || phase == "reveal" || phase == "scoring" || phase == "gameover") {
@@ -380,7 +345,6 @@ function GameDisplay() {
       <text x={Math.ceil(remaining/1000) >=10 ? "90" : "92"} y={46} fontSize={5}>
         {Math.ceil(remaining/1000)}
       </text>
-
     </g>
   },[remaining, phase])
 
@@ -469,7 +433,6 @@ function GameDisplay() {
       : null}
     </g>
   },[fakerCaught,voteIndex])
-
 
   const revealNoVote = useMemo(() => {
     return <g>
@@ -665,7 +628,6 @@ function GameDisplay() {
     return <g>
       <text x={getCenteredX(3,"The winner is".length)} y={8} fontSize={3}>The winner is</text>
       <motion.text
-        // x={45}
         y={28}
         initial={{
           x: 50,
@@ -710,20 +672,6 @@ function GameDisplay() {
     </g>
   },[playerScores,playerNames])
 
-  // const victoryScreen = useMemo(() => {
-  //   return <g>
-
-  //   </g>
-  // },[])
-  // console.log(phase)
-  // console.log(playerNames)
-  // console.log(playerArray)
-  // console.log(playerScores)
-  // console.log(playerImages.length)
-  // console.log()
-
-  console.log(phase)
-
   const gameTypeImage = useMemo(() => {
     return <g>
       <image href={gametypeImageRefs[gameType]} x={5} y={2} height={5} width={5}/>
@@ -743,9 +691,6 @@ function GameDisplay() {
     </g>
   },[playerImages,playerScores,playerNames])
 
-  // setPhase("gameover")
-  // console.log(playerNames)
-
   const chooserImage = useMemo(() => {
     return <g>
       <text x={20} y={10} fontSize={3}>{playerNames[chooserIndex]} is choosing a category</text>
@@ -759,35 +704,23 @@ function GameDisplay() {
   },[showWinner,victoryScreen,replayScreen])
   
 
-  return <svg id="main" x = "0px" y="0px" xmlns = "http://www.w3.org/2000/svg" viewBox="0 0 100 50">
+  return <div className={"displayBackground"}>
+  <svg id="main" x = "0px" y="0px" xmlns = "http://www.w3.org/2000/svg" viewBox="0 0 100 50">
     <defs>
       <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
         <feDropShadow dx="0" dy="0.5" stdDeviation="2" floodOpacity="0.3" />
       </filter>
-      {/* <linearGradient id="tileGradient" x1="0" x2="0" y1="0" y2="1">
-        <stop offset="0%" stopColor="rgb(173, 172, 172)" />
-        <stop offset="100%" stopColor="rgb(87, 87, 87)" />
-      </linearGradient> */}
       {gradients.map(g => (
       <linearGradient key={g.id} id={g.id} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor={g.start} />
         <stop offset="100%" stopColor={g.end} />
       </linearGradient>
-    ))}
-      {/* <filter id="noise">
-        <feTurbulence type="fractalNoise" baseFrequency="1" numOctaves={3} result="noise" />
-        <feColorMatrix type="saturate" values="0" colorInterpolationFilters="sRGB"/>
-        <feBlend in="SourceGraphic" in2="noise" mode="overlay" />
-      </filter> */}
+      ))}
     </defs>
+      <rect x="-10" y="-10" width={200} height={100} fill={"black"}/>
       <g>
-          <rect x="0" y="0" rx="2" ry="2" width="100" height={50} fill="url(#lightgrey)"
-          // stroke="black" strokeWidth={1}
-          />
-          {/* <text className="text" x="1" y="3" fontSize="3">Round {round+1}</text> */}
+          <rect x="0" y="0" rx="2" ry="2" width="100" height={50} fill="url(#lightgrey)"/>
           {banners}
-          {/* {gametypeOuterStyling} */}
-          {/* <text className="text" x="3" y="6" fontSize="3">Phase: {phase}</text> */}
           {timerImage}
       </g>    
       <g>
@@ -825,6 +758,7 @@ function GameDisplay() {
         })()}
       </g>
     </svg>
+    </div>
 }
 
 export default GameDisplay

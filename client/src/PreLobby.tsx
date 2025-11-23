@@ -29,6 +29,7 @@ function PreLobby() {
     console.log("Creating room")
     socket.emit("createRoom",true)
   }
+
   useEffect(() => {
     const handleEnterExistingRoom = (roomId:string, reason: string, thisId: number) => {
         if (roomId == "") {
@@ -50,13 +51,11 @@ function PreLobby() {
     const handleUnableToCreateRoom = () => {
         setErr("Unable to create room, server full.");
     };
+    
     socket.on("enterExistingRoom",handleEnterExistingRoom)
-
     socket.on("unableToCreateRoom", handleUnableToCreateRoom);
-
     return () => {
       socket.off("enterExistingRoom",handleEnterExistingRoom);
-
       socket.off("unableToCreateRoom", handleUnableToCreateRoom);
     }
   },[])
