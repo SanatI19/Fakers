@@ -624,7 +624,7 @@ function GameDisplay() {
   const victoryScreen = useMemo(() => {
     const winnerIndex: number = playerScores.indexOf(Math.max(...playerScores));
     const winnerName: string = playerNames[winnerIndex];
-    if (!winnerIndex || !winnerName) return;
+    if ( winnerIndex === -1 || !winnerName) return <g></g>;
     return <g>
       <text x={getCenteredX(3,"The winner is".length)} y={8} fontSize={3}>The winner is</text>
       <motion.text
@@ -703,6 +703,10 @@ function GameDisplay() {
     </g>
   },[showWinner,victoryScreen,replayScreen])
   
+  // console.log(victoryScreen)
+  // console.log(replayScreen)
+  // console.log(showWinner)
+  // console.log(gameOverImages)
 
   return <div className={"displayBackground"}>
   <svg id="main" x = "0px" y="0px" xmlns = "http://www.w3.org/2000/svg" viewBox="0 0 100 50">

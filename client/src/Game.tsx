@@ -19,6 +19,32 @@ function getGameTypeString(type: GameType) : string {
   }
 }
 
+function getBackgroundColor(type: GameType, phase: Phase) : string {
+  if (phase == "choosing" || phase == "gameover") {
+    return "rgb(213, 213, 213)"
+  }
+  // if (phase == "reveal") {
+  //   return "purple"
+  // }
+  switch(type) {
+    case "hands":
+      return "rgb(227, 147, 61)"
+    case "point":
+      return "rgb(103, 230, 105)"
+    case "numbers":
+      return "rgb(85, 198, 255)"
+  }
+}
+
+// const gradients = [
+//   { id: "lightgrey", start:"rgb(175, 175, 175)", end: "rgb(128, 128, 128)"},
+//   { id: "tan", start:"rgb(250, 214, 166)", end: "rgb(210, 180, 140)"},
+//   { id: "grey", start:"rgb(213, 213, 213)", end: "rgb(153, 153, 153)"},
+//   { id: "orange", start:"rgb(227, 147, 61)", end: "rgb(228, 123, 11)"},
+//   { id: "green", start: "rgb(103, 230, 105)", end: "rgb(49, 230, 52)" },
+//   { id: "blue", start: "rgb(85, 198, 255)", end: "rgb(0, 166, 249)"},
+// ];
+
 function Game() {
   const socket = useContext(SocketContext);
   const navigate = useNavigate();
@@ -148,34 +174,42 @@ function Game() {
     else return question
   },[question,fakerIndex])
 
-  return<div className="container">
-      <h2>Phase: {phase}</h2>
+  return<div className="gameBackground" style={{backgroundColor: getBackgroundColor(gameType, phase)}}>
 
-      {(phase === "choosing" && (!completedPhase)) && (chooserIndex == thisId) && (
-        gameTypeButtons
-      )}
+    <h2 style={{
+      background: "#222",
+      color: "white",
+      padding: "8px 14px",
+      borderRadius: "6px",
+      display: "inline-block"
+    }}>{phase == "gameover" ? "Game over" : ( phase == "choosing" ? "Choosing a game type": getGameTypeString(gameType))}</h2>
+    <br/>
 
-      {phase === "answering" && !completedPhase && (
-        <>
-          <p className="textGame">{questionText}</p>
-          {questionChoiceButtonsHandler}
-        </>
-      )}
+    {(phase === "choosing" && (!completedPhase)) && (chooserIndex == thisId) && (
+      gameTypeButtons
+    )}
 
-      {phase === "voting" && !completedPhase && (
-        <>
-          <p className="textGame">Vote for who you think is faking</p>
-          {voteButtons}
-        </>
-      )}
+    {phase === "answering" && !completedPhase && (
+      <>
+        <p className="textGame">{questionText}</p>
+        {questionChoiceButtonsHandler}
+      </>
+    )}
 
-      {phase === "gameover" && thisId == 0 && (
-        <>
-          <button className="buttonGame" onClick={() => socket.emit("triggerStartGame",room)}>Play again</button>
-          <button className="buttonGame" onClick={() => socket.emit("triggerEndGame",room)}>Exit</button>
-        </>
-      )}
-    </div>
+    {phase === "voting" && !completedPhase && (
+      <>
+        <p className="textGame">Vote for who you think is faking</p>
+        {voteButtons}
+      </>
+    )}
+
+    {phase === "gameover" && thisId == 0 && (
+      <>
+        <button className="buttonGame" onClick={() => socket.emit("triggerStartGame",room)}>Play again</button>
+        <button className="buttonGame" onClick={() => socket.emit("triggerEndGame",room)}>Exit</button>
+      </>
+    )}
+  </div>
 }
 
 export default Game
