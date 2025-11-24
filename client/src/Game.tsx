@@ -67,6 +67,28 @@ function Game() {
   },[room])
 
   useEffect(() => {
+    socket.on("connect",() => {
+      socket.emit("requestInitialState", room, thisId)
+    })
+  },[])
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        if (!socket.connected) {
+          console.log("Reconnecting socket...");
+          socket.connect();
+        }
+      }
+  };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
     const handleGetNames = (playerArray: Player[]) => {
       setPlayerNames(playerArray.map(player => player.name));
     }
