@@ -696,7 +696,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
 
     function calculateFakerScore(room: string,index: number): number {
         const storedChoices = games[room].storedChoices;
-        let outNum = 300*storedChoices[0].length;
+        let outNum = 200*storedChoices[0].length;
         const votedFor = Array(storedChoices[0].length).fill(0);
 
         for (let i = 0; i< storedChoices.length; i++) {
@@ -709,10 +709,10 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         }
         for (let i = 0; i < votedFor.length; i++) {
             if (i == votedFor.length-1 && games[room].fakerCaught) {
-                outNum -= 300;
+                outNum -= 200;
             }
             else {
-                outNum -= 150*1/(games[room].playerArray.length-1)*votedFor[i];
+                outNum -= 100*1/(games[room].playerArray.length-1)*votedFor[i];
             }
         }
         return outNum

@@ -174,10 +174,10 @@ function Game() {
     return <div>
       {playerNames.map((name:string, index: number) => 
       index == thisId ? null :
-      <button key={`${index}-${voteIndex}`} className="buttonGame" disabled={voteIndex == index || voteLocked} style={{backgroundColor: voteIndex==index ? "green": "lightgrey", opacity: voteIndex==index ? 0.8 : 1}} onClick={() => sendVote(index)}>{name}</button>
+      <button key={`${index}-${voteIndex}`} className="buttonGame" disabled={voteIndex == index || voteLocked} style={{backgroundColor: voteIndex==index ? "green": "rgb(255, 255, 255)", opacity: voteIndex==index ? 0.8 : 1}} onClick={() => sendVote(index)}>{name}</button>
     )}
-      <br/>
-      <button className="buttonGame" disabled={voteLocked || voteIndex == -1} onClick={lockVote}>{"Lock vote"}</button>
+      <br/><br/><br/>
+      <button className="buttonGame" disabled={voteLocked || voteIndex == -1} style={{backgroundColor: "rgb(255, 74, 74)", opacity: voteLocked || voteIndex == -1 ? 0.5: 1}} onClick={lockVote}>{"Lock vote"}</button>
     </div>
   },[playerNames,voteIndex,voteLocked])
 
@@ -221,7 +221,7 @@ function Game() {
     {phase === "voting" && !completedPhase && (
       <>
         <p className="textGame">Vote for who you think is faking</p>
-        {voteButtons}
+        {!voteLocked && voteButtons}
       </>
     )}
 

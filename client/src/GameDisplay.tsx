@@ -243,12 +243,24 @@ function GameDisplay() {
     return () => clearInterval(interval);
   }, [endTime]);
 
-  const banners: JSX.Element = useMemo(() => {
+  const topBanner: JSX.Element = useMemo(() => {
     return <g>
       <rect filter="url(#shadow)" x={1} y={1} rx={2} ry={2} width={98} height={12} fill={getBannerColor(gameType,phase)}/>
+    </g>
+  },[gameType,phase])
+
+  const bottomBanner: JSX.Element = useMemo(() => {
+    return <g>
       <rect filter="url(#shadow)" x={1} y={39} rx={2} ry={2} width={98} height={10} fill={getBannerColor(gameType,phase)}/>
     </g>
   },[gameType,phase])
+
+  // const banners: JSX.Element = useMemo(() => {
+  //   return <g>
+  //     <rect filter="url(#shadow)" x={1} y={1} rx={2} ry={2} width={98} height={12} fill={getBannerColor(gameType,phase)}/>
+  //     <rect filter="url(#shadow)" x={1} y={39} rx={2} ry={2} width={98} height={10} fill={getBannerColor(gameType,phase)}/>
+  //   </g>
+  // },[gameType,phase])
 
   const questionText = useMemo(() => {
     return <text x={20} y={5} fontSize={2} fill="black">{question}</text>
@@ -393,7 +405,7 @@ function GameDisplay() {
 
       />
       <motion.text
-        y = {40}
+        y = {44}
         initial={{
           fontSize: 0,
           x: 50,
@@ -486,17 +498,36 @@ function GameDisplay() {
   
   const showFakerImages = useMemo(() => {
     return <g>
-      <motion.text x={40} y={15} fontSize={3}
+      <motion.text x={35} y={10} fontSize={5}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 2 }}
       >The faker was</motion.text>
-      <motion.text x={40} y={25} fontSize={5}
+      <motion.text x={40} y={35} fontSize={5}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2, duration: 2 }}
         onAnimationComplete={goToShowPastScores}
       >{playerNames[fakerIndex]}</motion.text>
+      <motion.image
+        href={peopleImagesRefs[fakerIndex]}
+        initial={{
+          height: 0,
+          width: 0,
+          x: 50,
+          y: 20,
+        }}
+        animate={{
+          height:10,
+          width: 10,
+          x:45,
+          y: 15,
+        }}
+        transition={{
+          delay:2,
+          duration: 0.3,
+        }}
+      />
     </g>
   },[playerNames,fakerIndex])
 
@@ -675,7 +706,7 @@ function GameDisplay() {
   const gameTypeImage = useMemo(() => {
     return <g>
       <image href={gametypeImageRefs[gameType]} x={5} y={2} height={5} width={5}/>
-      <text x={5} y={9} fontSize={3}>{getGameTypeString(gameType)}</text>
+      <text x={5} y={10} fontSize={3}>{getGameTypeString(gameType)}</text>
     </g>
   },[gameType])
 
@@ -724,7 +755,8 @@ function GameDisplay() {
       <rect x="-10" y="-10" width={200} height={100} fill={"black"}/>
       <g>
           <rect x="0" y="0" rx="2" ry="2" width="100" height={50} fill="url(#lightgrey)"/>
-          {banners}
+          {!(phase == "scoring" && (showFaker || showPastQuestions)) && topBanner}
+          {!(phase == "scoring" && showFaker) && bottomBanner}
           {timerImage}
       </g>    
       <g>
@@ -753,6 +785,7 @@ function GameDisplay() {
             case "scoring":
               return <g>
                 {scoringImages}
+                {/* {showPastQuestions && gameTypeImageRight} */}
               </g>
             case "gameover":
               return <g>
