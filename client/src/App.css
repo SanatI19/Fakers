@@ -20,6 +20,10 @@
   border-radius: 1rem;
 }
 
+.buttonGame:active {
+  filter: brightness(0.85);
+}
+
 svg text {
   font-family: "Comic Sans MS";
   /* font-size: 20px; */

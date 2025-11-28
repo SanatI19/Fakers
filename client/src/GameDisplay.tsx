@@ -105,7 +105,7 @@ function getPlayerX(index: number) : number {
 
 function getPlayerY(index: number) : number {
   if (index >=5) {
-    return 28
+    return 31
   }
   return 18
 }
