@@ -1,5 +1,4 @@
 export interface ServerToClientEvents {
-    serverMsg: (data : {msg : string; room: string}) => void;
     enterExistingRoom: (room: string, reason: string, id: number) => void;
     unableToCreateRoom: () => void;
     sendPlayerArray: (playerArray: Player[]) => void;
@@ -14,14 +13,9 @@ export interface ServerToClientEvents {
     displayHands: () => void;
     displayNumbers: () => void;
     displayVotes: () => void;
-    // getTimer: (timer: number) => void;
-    // sendChoiceToPlayer: (chooserIndex: number) => void;
-    // revealPointDecisions: ()
-    // list all of the server to client events here (so easy goddamn)
 }
 
 export interface ClientToServerEvents {
-    clientMsg: (data : {msg : string; room: string}) => void;
     createRoom: (classic: boolean) => void;
     joinRoom: (room: string, deviceId: string, playerId: string) => void;
     requestPlayerArray: (room: string) => void;
@@ -30,22 +24,10 @@ export interface ClientToServerEvents {
     triggerRestartGame: (room: string) => void;
     requestInitialState: (room: string, id: number) => void;
     requestGameState: (room: string) => void;
-    sendBulletAndTarget: (bullet: number, targetId: number, id: number, room: string) => void;
-    sendGodfatherDecision: (id: number, target: number, room: string) => void;
-    sendHidingChoice: (id: number, choice: boolean, room : string) => void;
-    requestLootDict: (room: string) => void;
-    addItemToPlayer: (itemIndex: number, playerIndex: number, room:string) => void;
-    continueToGambling: (room: string) => void;
     joinPlayerArray: (room:string, deviceId: string, playerId: string) => void;
     socketDisconnected: (id: number, room: string) => void;
-    itemAnimationComplete: (itemIndex: number, playerIndex: number, room: string) => void;
-    shotsFiredComplete: (room: string) => void;
     requestRoom: (room: string) => void;
     requestRemovePlayer: (room: string, index: number) => void;
-
-    // sendPointChoice: (index: number) => void;
-    // sendNumberChoice: (num: number) => void;
-    // sendHandChoice: (raised: boolean) => void;
     joinDisplaySocket: (room: string, deviceId: string, playerId: string) => void;
     sendChoice: (room: string, id: number, index: number) => void;
     sendVote: (room: string, id:number, index: number) => void;
@@ -54,8 +36,6 @@ export interface ClientToServerEvents {
     lockInVote: (room: string, id: number) => void;
     revealOver: (room: string) => void;
     triggerEndGame: (room: string) => void;
-    // updateTimer: (room: string, timer: number) => void;
-    // list all of the client to server events here 
 }
 
 
@@ -74,8 +54,6 @@ export interface GameState {
     };
     question: string;
     counter: number;
-    // answering: boolean;
-    // voting: boolean;
     fakerIndex: number;
     phase: Phase;
     chooserIndex: number;
@@ -99,19 +77,13 @@ export type Phase = "choosing" | "answering" | "voting" | "reveal" | "scoring" |
 export type GameType = "hands" | "numbers" | "point";
 
 export class Player {
-    // Need to add more
-    // public id : number = 0;
     public deviceId: string;
     public internalId: string;
-    // public playerId : number = 0;
     public name: string = "";
     public connected: boolean;
     public completedPhase = false;
     public prevScore = 0;
     public totalScore = 0;
-
-
-    // public index: number = 0;
 
     public constructor(name: string, deviceIdIn: string, idIn: string) {
         this.name = name;
@@ -120,26 +92,3 @@ export class Player {
         this.connected=true;
     }
 }
-
-// export enum LootType {
-//     nft,
-//     gem,
-//     cash,
-//     medKit,
-//     clip,
-//     godfather,
-//     empty
-// }
-
-export type LootType = "nft" | "gem" | "cash" | "medkit" | "clip" | "godfather" | "empty";
-
-export class Loot {
-    public type: LootType;
-    public value = 0;
-
-    public constructor (typeVal: LootType, cashVal: number = 0) {
-        this.type = typeVal;
-        this.value = cashVal;
-    }
-}
-// export const __forceRuntime = true;

@@ -3,7 +3,7 @@ import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import { instrument } from "@socket.io/admin-ui";
 import cors from "cors";
-import {ServerToClientEvents , ClientToServerEvents, Player, GameState, Phase, Loot, LootType, GameType, IDisplayFunction} from "../shared";
+import {ServerToClientEvents , ClientToServerEvents, Player, GameState, GameType, IDisplayFunction} from "../shared";
 import path from "path";
 import { readFileSync } from "fs";
 
@@ -35,7 +35,7 @@ const roomCodeLength = 4;
 const MAX_PLAYERS = 10;
 const ROOM_TIMEOUT= 5*1000*60*60; // 5 min timer
 const MAX_STORED_LENGTH = 10;
-const MAX_ROUNDS = 2;
+const MAX_ROUNDS = 10;
 
 const ANSWER_TIMER = 20*1000;
 const VOTE_TIMER = 60*1000;
@@ -254,10 +254,6 @@ const gameoverTimers : Record<string,NodeJS.Timeout> = {}
 const socketToRoom : Record<string,string> = {};
 
 io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) => {
-    socket.on("clientMsg",(data) => {
-        io.sockets.emit("serverMsg",data);
-    })
-
     socket.on("joinRoom",(room: string, deviceId: string, playerId: string) => {
         let outRoom = "";
         let reason = "";
