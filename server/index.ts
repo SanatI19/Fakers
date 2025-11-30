@@ -435,6 +435,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         resetRoundQuestions(room);
         changeToChoosing(room);
         resetRoomTimeout(room,1);
+        games[room].round = 0;
         games[room].votesNeeded = Math.ceil(0.65*games[room].playerArray.length)
     }
 
