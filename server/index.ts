@@ -38,7 +38,7 @@ const MAX_STORED_LENGTH = 10;
 const MAX_ROUNDS = 10;
 
 const ANSWER_TIMER = 20*1000;
-const VOTE_TIMER = 60*1000;
+const VOTE_TIMER = 90*1000;
 const CHOOSING_TIMER = 10*1000;
 
 const dataHands = readFileSync("../hands.txt", "utf-8");
