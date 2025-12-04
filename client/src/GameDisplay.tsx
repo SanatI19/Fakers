@@ -3,7 +3,7 @@ import { useContext, useEffect, useState, useMemo, JSX} from "react";
 import { motion } from "framer-motion";
 import { useLocation, useNavigate} from "react-router-dom";
 import { SocketContext } from "./App";
-import { GameState, Player , Phase, GameType} from "../../shared";
+import { GameState, Player , Phase, GameType, ChoiceType} from "../../shared";
 import "./App.css";
 
 const peopleImagesRefs = ["/images/person1.svg", "/images/person2.svg",
@@ -40,6 +40,8 @@ const gametypeImageRefs: Record<GameType,string> = {
   "numbers": "/images/numbers.svg",
   "hands": "/images/hands.svg",
   "point": "/images/point.svg",
+  "emoji": "/images/emoji.svg",
+  "percent": "/images/percent.svg",
 }
 
 function getGameTypeString(type: GameType) : string {
@@ -50,6 +52,10 @@ function getGameTypeString(type: GameType) : string {
       return "To the point"
     case "numbers":
       return "By the numbers"
+    case "emoji":
+      return "Emoji madness"
+    case "percent":
+      return "Give 110%"
   }
 }
 
@@ -60,6 +66,9 @@ const gradients = [
   { id: "orange", start:"rgb(227, 147, 61)", end: "rgb(228, 123, 11)"},
   { id: "green", start: "rgb(103, 230, 105)", end: "rgb(49, 230, 52)" },
   { id: "blue", start: "rgb(85, 198, 255)", end: "rgb(0, 166, 249)"},
+  { id: "pink", start: "rgb(252, 99, 240)", end: "rgb(255, 149, 246)"},
+  { id: "purple", start: "rgb(151, 106, 255)", end: "rgb(181, 149, 255)"},
+  { id: "yellow", start: "rgb(249, 252, 99)", end: "rgb(253, 255, 153)"},
 ];
 
 function getBannerColor(type: GameType, phase: Phase) : string {
@@ -76,6 +85,10 @@ function getBannerColor(type: GameType, phase: Phase) : string {
       return "url(#green)"
     case "numbers":
       return "url(#blue)"
+    case "emoji":
+      return "url(#yellow)"
+    case "percent":
+      return "url(#purple)"
   }
 }
 
@@ -143,7 +156,7 @@ function GameDisplay() {
   const navigate = useNavigate();
   const [playerNames,setPlayerNames] = useState<string[]>([""]);
   const [playerArray, setPlayerArray] = useState<Player[]>([]);
-  const [choiceArray, setChoiceArray] = useState<number[]>(Array(8).fill(-1))
+  const [choiceArray, setChoiceArray] = useState<ChoiceType[]>(Array(10).fill(-1))
   const [gameType, setGameType] = useState<GameType>("hands");
   const [phase, setPhase] = useState<Phase>("choosing");
   const [question, setQuestion] = useState<string>("");
@@ -199,6 +212,7 @@ function GameDisplay() {
       setVotesNeeded(gameState.votesNeeded);
       setEndTime(gameState.endTime);
       setChooserIndex(gameState.chooserIndex);
+      localStorage.setItem("fakersPastChoices",JSON.stringify(gameState.pastChoices))
     }
 
     const handleSocketDisconnect = () => {
@@ -263,7 +277,12 @@ function GameDisplay() {
   // },[gameType,phase])
 
   const questionText = useMemo(() => {
-    return <text x={20} y={5} fontSize={2} fill="black">{question}</text>
+    return <foreignObject x={15} y={3} width="80" height="15">
+    <div
+      style={{width:80, fontSize:2, wordWrap:"break-word",fontFamily: "Comic Sans MS", textAlign: "left"}}>
+      {question}
+    </div>
+  </foreignObject>
   },[question])
 
   const playerImages: JSX.Element[] = useMemo(() => 
@@ -293,6 +312,7 @@ function GameDisplay() {
   const pointingImages : JSX.Element[] = useMemo(() => {
     const counts: number[] = Array(choiceArray.length).fill(0);
     return (choiceArray.map((val,index) => {
+      if (typeof(val) !== "number") {return <g></g>}
       if (val < 0) return <g key={index}></g>
       counts[val]++;
       return (<g key={index}>
@@ -304,7 +324,7 @@ function GameDisplay() {
 
   const numberImages : JSX.Element[] = useMemo(() => 
     choiceArray.map((val,index) => (
-      val >= 0 ?
+      typeof(val) === "number" && val >= 0 ?
       <g key={index}>
         <circle cx={getPlayerX(index) + 6} cy={getPlayerY(index)+2} r={1.5} fill="black"/>
         <text x={getPlayerX(index)+5.5} y={getPlayerY(index)+2.8} fontSize={2.5} fill="white">{val}</text>
@@ -313,21 +333,51 @@ function GameDisplay() {
     ))
   ,[choiceArray])
 
+  const emojiImages : JSX.Element[] = useMemo(() => 
+    choiceArray.map((val,index) => (
+      typeof(val) === "string" ?
+      <g key={index}>
+        <text x={getPlayerX(index)+5.5} y={getPlayerY(index)+2.8} fontSize={3.5} fill="white">{val}</text>
+      </g>
+      : <g key={index}></g>
+    ))
+  ,[choiceArray])
+
+  const percentImages : JSX.Element[] = useMemo(() => 
+      choiceArray.map((val,index) => (
+      typeof(val) === "number" && val != -1 ?
+      <g key={index}>
+        <rect x={getPlayerX(index) + 4.5} y={getPlayerY(index)+0.5} width={7.5} height={3} fill="white"/>
+        <text x={getPlayerX(index)+5.5} y={getPlayerY(index)+2.8} fontSize={2.5} fill="black">{val}%</text>
+      </g>
+      : <g key={index}></g>
+    ))
+  ,[choiceArray])
+
   function answerImages(gameType : GameType) : JSX.Element[] {
-    if (gameType == "hands") {
-      return raisedImages;
-    }
-    else if (gameType == "numbers") {
-      return [<g key={1}>
+    switch (gameType) {
+      case "hands":
+        return raisedImages;
+      case "numbers":
+        return [<g key={1}>
         {playerImages}
         {numberImages}
       </g>]
-    }
-    else {
-      return [<g key={1}>
-        {playerImages}
-        {pointingImages}
-      </g>]
+      case "point":
+        return [<g key={1}>
+          {playerImages}
+          {pointingImages}
+        </g>]
+      case "emoji":
+        return [<g key={1}>
+          {playerImages}
+          {emojiImages}
+        </g>]
+      case "percent":
+        return [<g key={1}>
+          {playerImages}
+          {percentImages}
+        </g>]
     }
   }
 
@@ -368,7 +418,7 @@ function GameDisplay() {
       >Majority voted for</text>
       <motion.text
         // x={45}
-        y={28}
+        y={32}
         initial={{
           x: 50,
           fontSize: 0,
@@ -390,13 +440,13 @@ function GameDisplay() {
           height: 0,
           width: 0,
           x: 50,
-          y: 20,
+          y: 24,
         }}
         animate={{
           height:10,
           width: 10,
           x:45,
-          y: 15,
+          y: 19,
         }}
         transition={{
           delay:1.5,
@@ -435,7 +485,7 @@ function GameDisplay() {
           y:-20
         }}
         animate={{
-          y:12
+          y:16
         }}
         transition={{
           delay: 5,
@@ -565,7 +615,12 @@ function GameDisplay() {
           transition={{delay:5*index, duration:0.1}}
         >
           <text x={10} y={8+10*index} fontSize={1.5} fontWeight={"bold"}>Task #{index+1}</text>
-          <text x={10} y={10+10*index} fontSize={1.5}>{question}</text>
+          <foreignObject x={10} y={9+10*index} width={85} height={10}>
+            <div
+              style={{width:85, fontSize:1.5, wordWrap: "break-word",fontFamily: "Comic Sans MS", textAlign: "left"}}>
+              {question}
+            </div>
+          </foreignObject>
         </motion.g>
       )}
       {playerNames.map((nameVal,index) => 

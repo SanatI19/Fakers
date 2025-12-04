@@ -1,0 +1,137 @@
+{
+    "questions": [
+{"question": "You accidentally text the wrong person", "answers": ["Apologize","Explain briefly","Act like nothing happened"]},
+{"question":"You realize you forgot a friend's birthday","answers": ["I would never get in this scenario","Apologize","Make up for it"]},
+{"question":"You overhear someone misrepresenting your opinion","answers": ["Correct them","Say nothing","Crash out"]},
+{"question":"You're at a restaurant and your order is completely wrong","answers": ["Accept it","Ask them to fix it","Wait for someone else to step in"]},
+{"question":"You realize your friend is upset in a group scenario, but you aren't sure why","answers": ["Text them","Leave it","Ask them out loud"]},
+{"question":"You accepted plans but last minute don't feel like going","answers": ["Make up an excuse","Be honest","Do it anyway"]},
+{"question":"Someone gives you a gift you don't need or want","answers": ["Express enthusiasm","Act confused/upset","Stay neutral"]},
+{"question":"You're in a group and you notice someone is uncomfortable/upset by the current conversation","answers": ["Say nothing","Shift the convo","Make a joke"]},
+{"question":"You're in a group and notice that someone is being left out of the conversation","answers": ["Say nothing","Shift the group convo","Start a separate convo"]},
+{"question":"You see a friend struggling but you're unsure if they want help","answers": ["Go up to them","Wait and see","Do nothing"]},
+{"question":"You see a stranger struggling but you're unsure if they want help","answers": ["Go up to them","Wait and see","Do nothing"]},
+{"question":"Somoeone tells a story you know is untrue","answers": ["Say something","Ignore it","Ask questions"]},
+{"question":"You make a plan and others start changing it without asking","answers": ["Say something","Go with the flow","Get upset but stay silent"]},
+{"question":"Someone threatens your friend with physical violence","answers": ["Let them handle it","Step in","Get help"]},
+{"question":"Someone you know is clearly hiding something from you, but you're not sure if it's serious","answers": ["Ask around","Ignore it","Talk to them"]},
+{"question":"Someone compliments you in a way that feels slightly off","answers": ["Accept it","Act awkward","Ask what they meant"]},
+{
+    "question": "You find an old notebook tucked behind a shelf in a café, filled with what look like personal notes and sketches. No one nearby claims it",
+    "answers": ["Leave it be", "Take a closer look", "Hand it off", "Set it aside for later"]
+  },
+  {
+    "question": "While on a long walk, you notice a small path that branches off the main trail. It's not marked on any map you checked earlier.  ",
+    "answers": ["Stay on track", "Check it out briefly", "Commit to the new route", "Return later"]
+  },
+  {
+    "question": "A friend excitedly tells you a story, but you realize halfway through that you already know a crucial part they don't.",
+    "answers": ["Say it immediately", "Wait for your moment", "Let it slide"]
+  },
+  {
+    "question": "You overhear two strangers talking about something that directly relates to a project you're working on",
+    "answers": ["Stay silent", "Join in lightly", "Ask a question"]
+  },
+  {
+    "question": "You're at an event, and someone you vaguely recognize waves at you with clear enthusiasm. You cannot remember who they are",
+    "answers": ["Wave", "Act like you didn't see", "Act confused"]
+  },
+  {
+    "question": "Late at night, your phone buzzes with a message preview that seems urgent, but you can't see the whole thing",
+    "answers": ["Check now", "Ignore it","Wait"]
+  },
+  {
+    "question": "You're cooking something new, and halfway through you notice the instructions don't match the ingredients you have",
+    "answers": ["Continue anyway", "Start over", "Stop entirely"]
+  },
+  {
+    "question": "A song you’ve never heard starts playing, but you instantly recognize the lyrics.",
+    "answers": ["Listen fully", "Turn it off", "Look it up", "Save it for later"]
+  },
+  {
+    "question": "You get an email from someone with your exact name but a different domain.",
+    "answers": ["Open it", "Delete it", "Skim it"]
+  },
+  {
+    "question": "You walk into a room and everyone suddenly stops talking.",
+    "answers": ["Make a joke", "Leave", "Crash out", "Ignore it"]
+  },
+  {
+    "question": "A cashier gives you too much change and doesn't seem to notice.",
+    "answers": ["Correct them", "Say nothing", "Wait to see"]
+  },
+  {
+    "question": "You discover a door in a building you've been in many times but never noticed before.",
+    "answers": ["Open it", "Leave it", "Ask about it", "Come back later"]
+  },
+  {
+    "question": "You notice that an item in a store is marked far cheaper than it should be.",
+    "answers": ["Buy it", "Ask first", "Leave it"]
+  },
+  {
+    "question": "You recognize someone on the street",
+    "answers": ["Acknowledge them", "Avoid eye contact", "Smile lightly", "Walk away"]
+  },
+  {
+    "question": "Your name is called in a waiting room, but multiple people stand up.",
+    "answers": ["Step forward", "Wait to see", "Ask for clarity"]
+  },
+  {
+    "question": "You sit down in a public place and someone immediately sits unusually close to you.",
+    "answers": ["Move", "Stay put", "Engage lightly"]
+  },
+  {
+    "question": "You make a comment and someone reacts far more strongly than expected.",
+    "answers": ["Clarify", "Apologize", "Ignore it", "Shift topics"]
+  },
+  {
+    "question": "You hear a loud noise somewhere in your home that you can't immediately explain.",
+    "answers": ["Investigate", "Wait quietly", "Call someone", "Ignore it"]
+  },
+  {
+    "question": "Someone sends you a message clearly meant for someone else.",
+    "answers": ["Correct them", "Ignore it", "Make a joke"]
+  },
+  {
+    "question": "You find a message written in chalk on the sidewalk that seems directed at you personally.",
+    "answers": ["Ignore it", "Take a photo", "Look around"]
+  },
+  {
+    "question": "You receive two contradictory instructions from two equally authoritative people.",
+    "answers": ["Pick one", "Wait", "Ask for clarity", "Do neither"]
+  },
+  {
+    "question": "You open your front door and find a delivery with no label at all.",
+    "answers": ["Take it", "Leave it", "Ask neighbors", "Inspect it"]
+  },
+  {
+    "question": "You discover an old photo on your phone with a friend you haven't talked to in years.",
+    "answers": ["Reach out", "Send it", "Delete it", "Do nothing"]
+  },
+  {
+    "question": "You find a shirt you like online but the reviews are very mixed.",
+    "answers": ["Buy it", "Skip it", "Research more", "Wait for a deal"]
+  },
+  {
+    "question": "You're in a group setting and everyone else decides they want to do something you hate.",
+    "answers": ["Say something", "Go with the flow", "Continue but act mad", "Leave"]
+  },
+  {
+    "question": "You wake up earlier than planned and feel more alert than usual.",
+    "answers": ["Get up", "Rest more", "Start slow", "Change plans"]
+  },
+  {
+    "question": "You didn't hear what someone said but you already asked them to repeat themselves twice",
+    "answers": ["Pretend", "Ask a question", "Make a guess"]
+  },
+  {
+    "question": "You're trying to remember the name of something and the answer is on the tip of your tongue.",
+    "answers": ["Think harder", "Leave it", "Search it", "Ask someone"]
+  },
+  {
+    "question": "You're invited to join a group activity you’ve never tried before.",
+    "answers": ["Join in", "Sit out", "Watch first", "Ask questions"]
+  },
+{"question":"","answers": []}
+    ]
+}

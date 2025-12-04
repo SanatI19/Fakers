@@ -50,17 +50,27 @@ function PreGameDisplay() {
         }
       }
 
+      const handleRequestPastChoices = () => {
+        const pastChoices = localStorage.getItem("fakersPastChoices")
+        if (pastChoices) {
+          const pastChoicesOut: Record<string, number[]> = JSON.parse(pastChoices)
+          socket.emit("sendPastChoices",room,pastChoicesOut)
+        }
+      }
+
       const handleStartGame = () => {
         navigate(`/${room}/gameDisplay`,{state :{room: room, id: thisId}})
       }
 
       socket.on("sendPlayerArray",handleSendPlayerArray);
+      socket.on("requestPastChoices",handleRequestPastChoices);
       socket.on("startGame", handleStartGame);
       socket.on("failedToAccessRoom",handleFailedToAccessRoom);
       socket.on("removePlayerFromLobby",handleRemovePlayerFromLobby)
 
       return () => {
         socket.off("sendPlayerArray",handleSendPlayerArray);
+        socket.off("requestPastChoices",handleRequestPastChoices);
         socket.off("startGame", handleStartGame);
         socket.off("failedToAccessRoom",handleFailedToAccessRoom);
         socket.off("removePlayerFromLobby",handleRemovePlayerFromLobby)

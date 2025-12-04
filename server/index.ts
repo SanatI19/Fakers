@@ -3,7 +3,7 @@ import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import { instrument } from "@socket.io/admin-ui";
 import cors from "cors";
-import {ServerToClientEvents , ClientToServerEvents, Player, GameState, GameType, IDisplayFunction} from "../shared";
+import {ServerToClientEvents , ClientToServerEvents, Player, GameState, GameType, IDisplayFunction, ChoiceType} from "../shared";
 import path from "path";
 import { readFileSync } from "fs";
 
@@ -34,10 +34,10 @@ server.listen(PORT, () => {
 const roomCodeLength = 4;
 const MAX_PLAYERS = 10;
 const ROOM_TIMEOUT= 5*1000*60*60; // 5 min timer
-const MAX_STORED_LENGTH = 10;
+const MAX_STORED_LENGTH = 40;
 const MAX_ROUNDS = 10;
 
-const ANSWER_TIMER = 20*1000;
+const ANSWER_TIMER = 30*1000;
 const VOTE_TIMER = 90*1000;
 const CHOOSING_TIMER = 10*1000;
 
@@ -49,6 +49,12 @@ const pointTasks = dataPoint.split("\n");
 
 const dataNumbers = readFileSync("../numbers.txt", "utf-8");
 const numbersTasks = dataNumbers.split("\n");
+
+const dataEmojis = readFileSync("../emojis.txt", "utf-8");
+const emojisTasks = dataEmojis.split("\n");
+
+const dataPercent = readFileSync("../percent.txt", "utf-8");
+const percentTasks = dataPercent.split("\n");
 
 function resetChoiceArray(room: string) {
     games[room].choiceArray = Array(games[room].playerArray.length).fill(-1);
@@ -77,7 +83,7 @@ function newGameState(type: boolean):GameState {
         displaySocket: "", 
         classic: type, 
         gameType: "hands", 
-        pastChoices: {"hands": [], "point": [], "numbers": []}, 
+        pastChoices: {"hands": [], "point": [], "numbers": [], "emoji": [], "percent": []}, 
         question: "", 
         fakerIndex: -1, 
         phase: "choosing", 
@@ -146,6 +152,10 @@ function getPrefix(type: GameType, phrase: string) : string {
             else {
                 return "Hold up as many fingers as "
             }
+        case "emoji":
+            return "Pick an emoji to describe "
+        case "percent":
+            return "What percent"
     }
 }
 
@@ -160,6 +170,12 @@ function getRandomQuestion(room: string, type: GameType) : string {
             break;
         case "numbers":
             file = numbersTasks;
+            break;
+        case "emoji":
+            file = emojisTasks;
+            break;
+        case "percent":
+            file = percentTasks;
             break;
     }   
     const question = randomizeChoice(room, type, file);
@@ -247,6 +263,17 @@ function removeTimers(room:string) : void {
     delete gameTimers[room];
 }
 
+function isInitial(pastChoices: {[type: string] : number[]}): boolean {
+    if (pastChoices["hands"].length==0 
+        && pastChoices["point"].length==0 
+        && pastChoices["numbers"].length==0 
+        && pastChoices["emoji"].length==0
+        && pastChoices["percent"].length==0) {
+            return true
+        } 
+    return false
+}
+
 
 const games : Record<string,GameState> = {};
 const gameTimers : Record<string,NodeJS.Timeout> = {}
@@ -329,8 +356,12 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
     socket.on("joinPlayerArray",(room: string, deviceId: string, playerId: string) => {
         if (games[room] === undefined) {
             socket.emit("failedToAccessRoom")
+            return;
         }
-        else {
+        if (games[room].started) {
+            socket.emit("startGame");
+            return;
+        }
             socket.join(room)
             socketToRoom[socket.id] = room;
             const playerArray = games[room].playerArray;
@@ -373,14 +404,14 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
                     playerArray.push(new Player(name,deviceId, playerId))
                     games[room].sockets[index] = socket.id;
                     socket.emit("getPlayerIndex",index);
-                    io.to(room).emit("sendPlayerArray",playerArray);
+                    io.to(room).emit("sendPlayerArray",playerArray)
                 }
             }
             if (playerArray.length == MAX_PLAYERS) {
                 games[room].joinable = false;
             }
         }
-    })
+    )
 
     socket.on("requestRemovePlayer", (room: string, index: number) => {
         if (games[room] === undefined) {
@@ -410,7 +441,18 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             return;
         }
         resetGame(room);
+        if (isInitial(games[room].pastChoices)) {
+            io.to(games[room].displaySocket).emit("requestPastChoices");
+        }
         io.to(room).emit("startGame");
+    })
+
+    socket.on("sendPastChoices", (room: string, pastChoices: Record<GameType,number[]>) => {
+        if (!games[room]) {
+            socket.emit("failedToAccessRoom");
+            return
+        }
+        games[room].pastChoices = pastChoices;
     })
 
     socket.on("triggerRestartGame", (room: string) => {
@@ -436,11 +478,15 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         changeToChoosing(room);
         resetRoomTimeout(room,1);
         games[room].round = 0;
+        games[room].started = true;
         games[room].votesNeeded = Math.ceil(0.65*games[room].playerArray.length)
     }
 
     socket.on("requestInitialState",(room: string, id: number) => {
-        if (games[room] !== undefined) {  
+        if (!games[room]) {  
+            socket.emit("failedToAccessRoom");
+            return
+        }
             socket.join(room);
             socketToRoom[socket.id] = room;
             if (id == -1) {
@@ -456,18 +502,14 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("getPlayerNames",games[room].playerArray);
             socket.emit("getGameState",games[room]);
         }
-        else {
-            socket.emit("failedToAccessRoom");
-        }
-    })
+    )
 
     socket.on("requestGameState", (room: string) => {
-        if (games[room] === undefined) {
+        if (!games[room]) {
             socket.emit("failedToAccessRoom");
+            return
         }
-        else {
-            socket.emit("getGameState", games[room]);
-        }
+        socket.emit("getGameState", games[room]);
     })
 
     function prepForAnswering(room: string, type: GameType) : void {
@@ -486,7 +528,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         changeToAnswering(room)
     })
 
-    socket.on("sendChoice",(room: string, id: number, index: number) => {
+    socket.on("sendChoice",(room: string, id: number, index: ChoiceType) => {
         if (!games[room]) {
             socket.emit("failedToAccessRoom")
             return

@@ -34,29 +34,48 @@ function PreGame() {
   }
 
   useEffect(() => {
-      let playerUUID = sessionStorage.getItem("playerUUID");
-      let deviceUUID = localStorage.getItem("deviceUUIDlawlessForever");
-      if (playerUUID === null) {
-          playerUUID = crypto.randomUUID();
-      }
-      if (deviceUUID === null) {
-        deviceUUID = crypto.randomUUID();
-      }
-      playerId = playerUUID;
-      sessionStorage.setItem("playerUUID",playerId);
-      deviceId = deviceUUID;
-      localStorage.setItem("deviceUUIDlawlessForever",deviceId);
-  
-      socket.emit("joinPlayerArray", room, deviceId, playerId)
+    let playerUUID = sessionStorage.getItem("playerUUID");
+    let deviceUUID = localStorage.getItem("deviceUUIDlawlessForever");
+    if (playerUUID === null) {
+        playerUUID = crypto.randomUUID();
+    }
+    if (deviceUUID === null) {
+      deviceUUID = crypto.randomUUID();
+    }
+    playerId = playerUUID;
+    sessionStorage.setItem("playerUUID",playerId);
+    deviceId = deviceUUID;
+    localStorage.setItem("deviceUUIDlawlessForever",deviceId);
+    socket.emit("joinPlayerArray", room, deviceId,playerId)
+  },[room])
 
+  useEffect(() => {
+    socket.on("connect",() => {
+      socket.emit("joinPlayerArray", room, deviceId,playerId)
+    })
+  },[])
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        if (!socket.connected) {
+          console.log("Reconnecting socket...");
+          socket.connect();
+        }
+      }
+  };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
       const handleGetPlayerIndex = (index: number) => {
           thisId = index;
       }
 
-      const handleSendPlayerArray = (playerArrayIn: Player[]) => {
-          setLength(playerArrayIn.length);
-          setName(playerArrayIn[thisId].name)
-      }
 
       const handleFailedToAccessRoom = () => {
         navigate(`/`)
@@ -79,14 +98,12 @@ function PreGame() {
         navigate(`/${room}/game`,{state :{room: room, id: thisId}})
       }
 
-      socket.on("sendPlayerArray",handleSendPlayerArray);
       socket.on("getPlayerIndex", handleGetPlayerIndex);
       socket.on("startGame", handleStartGame);
       socket.on("failedToAccessRoom",handleFailedToAccessRoom);
       socket.on("removePlayerFromLobby",handleRemovePlayerFromLobby)
 
       return () => {
-        socket.off("sendPlayerArray",handleSendPlayerArray);
         socket.off("getPlayerIndex", handleGetPlayerIndex);
         socket.off("startGame", handleStartGame);
         socket.off("failedToAccessRoom",handleFailedToAccessRoom);
@@ -94,6 +111,21 @@ function PreGame() {
       };
 
   },[])
+
+  useEffect(() => {
+    const handleSendPlayerArray = (playerArrayIn: Player[]) => {
+        setLength(playerArrayIn.length);
+        if (name == "") {
+          setName(playerArrayIn[thisId].name)
+        }
+    }
+
+    socket.on("sendPlayerArray",handleSendPlayerArray);
+    
+    return () => {
+      socket.off("sendPlayerArray",handleSendPlayerArray);
+    }
+  },[name])
 
   return <div>
       <div>

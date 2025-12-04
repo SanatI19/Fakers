@@ -13,6 +13,7 @@ export interface ServerToClientEvents {
     displayHands: () => void;
     displayNumbers: () => void;
     displayVotes: () => void;
+    requestPastChoices: () => void;
 }
 
 export interface ClientToServerEvents {
@@ -29,15 +30,19 @@ export interface ClientToServerEvents {
     requestRoom: (room: string) => void;
     requestRemovePlayer: (room: string, index: number) => void;
     joinDisplaySocket: (room: string, deviceId: string, playerId: string) => void;
-    sendChoice: (room: string, id: number, index: number) => void;
+    sendChoice: (room: string, id: number, choice: ChoiceType) => void;
     sendVote: (room: string, id:number, index: number) => void;
     sendGameTypeDecision: (room: string, type: GameType) => void;
     scoringAnimationOver: (room: string) => void;
     lockInVote: (room: string, id: number) => void;
     revealOver: (room: string) => void;
     triggerEndGame: (room: string) => void;
+    sendEmoji: (room: string, id: number, emoji: string) => void;
+    sendPastChoices: (room: string, pastChoices: Record<GameType,number[]>) => void;
 }
 
+export type ChoiceType = number | string;
+// export type ChoiceArrType = number[] | string[];
 
 export interface GameState {
     playerArray: Player[];
@@ -49,15 +54,13 @@ export interface GameState {
     displaySocket: string;
     classic: boolean;
     gameType: GameType;
-    pastChoices: {
-        [type: string] : number[]
-    };
+    pastChoices: Record<GameType,number[]>;
     question: string;
     counter: number;
     fakerIndex: number;
     phase: Phase;
     chooserIndex: number;
-    choiceArray: number[];
+    choiceArray: ChoiceType[];
     voteArray: number[];
     voteLocked: boolean[];
     storedChoices: number[][];
@@ -74,7 +77,7 @@ export interface IDisplayFunction {
 
 export type Phase = "choosing" | "answering" | "voting" | "reveal" | "scoring" | "gameover";
 
-export type GameType = "hands" | "numbers" | "point";
+export type GameType = "hands" | "numbers" | "point" | "emoji" | "percent";
 
 export class Player {
     public deviceId: string;

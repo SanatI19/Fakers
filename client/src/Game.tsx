@@ -3,8 +3,10 @@ import { useContext, useEffect, useState, useMemo, JSX} from "react";
 // import { motion } from "framer-motion";
 import { useLocation, useNavigate} from "react-router-dom";
 import { SocketContext } from "./App";
-import { GameState, Player , Phase, GameType} from "../../shared";
+import { GameState, Player , Phase, GameType, ChoiceType} from "../../shared";
 import "./App.css";
+
+// const EMOJI_REGEX = /\p{Extended_Pictographic}/gu;
 
 const fakerText = "You are the faker, pick something random"
 
@@ -16,6 +18,10 @@ function getGameTypeString(type: GameType) : string {
       return "To the point"
     case "numbers":
       return "By the numbers"
+    case "emoji":
+      return "Emoji madness"
+    case "percent":
+      return "Give 110%"
   }
 }
 
@@ -33,6 +39,10 @@ function getBackgroundColor(type: GameType, phase: Phase) : string {
       return "rgb(103, 230, 105)"
     case "numbers":
       return "rgb(85, 198, 255)"
+    case "emoji":
+      return "rgb(249, 252, 99)"
+    case "percent":
+      return "rgb(151, 106, 255)"
   }
 }
 
@@ -57,6 +67,10 @@ function Game() {
   const [chooserIndex, setChooserIndex] = useState<number>(0);
   const [voteIndex, setVoteIndex] = useState<number>(-1);
   const [voteLocked,setVoteLocked] = useState<boolean>(false);
+  const [emojiVal, setEmojiVal] = useState<string>("");
+  const [percentVal, setPercentVal] = useState<number>(50);
+  const [endTime,setEndTime] = useState<number>(0);
+  const [remaining, setRemaining] = useState<number>(0);
 
   const {state} = useLocation()
   const room = state.room;
@@ -105,6 +119,7 @@ function Game() {
       setQuestion(gameState.question);
       setCompletedPhase(gameState.playerArray[thisId].completedPhase)
       setVoteIndex(gameState.voteArray[thisId])
+      setEndTime(gameState.endTime);
       setVoteLocked(gameState.voteLocked[thisId])
     }
 
@@ -125,12 +140,53 @@ function Game() {
     }
   },[])
 
-  const questionChoiceButtonsHandler = useMemo(() => {
-    return questionChoiceButtons(gameType)
-  },[gameType])
+  useEffect(() => {
+    if (!endTime || phase == "scoring" || phase == "gameover" || phase == "reveal") return;
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const diff = Math.max(0, endTime - now);
+      setRemaining(diff);
+    }, 1000); // Smooth updates
 
-  function sendClick(index: number): void {
-    socket.emit("sendChoice",room,thisId,index);
+    return () => clearInterval(interval);
+  }, [endTime]);
+
+
+
+  const timerImage = useMemo(() => {
+    if (remaining <= 0 || (phase == "choosing" && thisId != chooserIndex) || phase == "reveal" || phase == "scoring" || phase == "gameover") {
+      return null
+    }
+    return <span style={{backgroundColor: remaining/1000 <= 10 ? "red": "white",
+      padding: "0.8rem",
+      borderRadius: "1rem",
+      display: "inline-block",
+    }}> 
+        {Math.ceil(remaining/1000)}
+      </span>
+  },[remaining, phase])
+
+  const handleEmojiChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value == "") {
+      setEmojiVal("")
+      return;
+    }
+    const emojis = e.target.value.match(/\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu);
+    if (emojis) {
+      setEmojiVal(emojis.join(""))
+    } 
+  };
+
+  const handlePercentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPercentVal(Number(event.target.value));
+  };
+
+  // const questionChoiceButtonsHandler = useMemo(() => {
+  //   return questionChoiceButtons(gameType)
+  // },[gameType])
+
+  function sendClick(choice: ChoiceType): void {
+    socket.emit("sendChoice",room,thisId,choice);
   }
 
   function sendVote(index: number) : void {
@@ -146,29 +202,68 @@ function Game() {
     setVoteLocked(true);
     socket.emit("lockInVote",room,thisId)
   }
-
-  function questionChoiceButtons(type: GameType): JSX.Element {
+  
+  const questionChoiceButtons = useMemo(() => {
     const numbers = [0,1,2,3,4,5];
-    switch (type) {
+    switch (gameType) {
       case "hands":
-        return <g>
+        return <>
           <button className="buttonGame" onClick={() => sendClick(1)}>Raise hand</button>
           <button className="buttonGame" onClick={() => sendClick(0)}>Don't raise hand</button>
-        </g>
+        </>
       case "numbers":
-        return <g>
+        return <>
           {numbers.map((val:number, index:number) => 
             <button key={index} className="buttonGame" onClick={() => sendClick(val)}>{val}</button>
           )}
-        </g>
+        </>
       case "point":
-        return <g>
+        return <>
           {playerNames.map((name: string, index: number) => 
             <button key={index} className="buttonGame" onClick={() => sendClick(index)}>{name}</button>
           )}
-        </g>
+        </>
+      case "emoji":
+        return <>
+          <input className="inputGame" type="text" value={emojiVal} onChange={handleEmojiChange} maxLength={2}/>
+          <button className="buttonGame" disabled={emojiVal == ""} onClick={() => sendClick(emojiVal)}>Submit</button>
+        </>
+      case "percent":
+        return <>
+          <p>{percentVal}%</p>
+          <input className="inputGame" type="range" min={0} max={100} value={percentVal} onChange={handlePercentChange}/>
+          <button className="buttonGame" onClick={() => sendClick(percentVal)}>Submit</button>
+        </>
     }
-  }
+  },[gameType,emojiVal,percentVal])
+
+  // function questionChoiceButtons(type: GameType): JSX.Element {
+  //   const numbers = [0,1,2,3,4,5];
+  //   switch (type) {
+  //     case "hands":
+  //       return <>
+  //         <button className="buttonGame" onClick={() => sendClick(1)}>Raise hand</button>
+  //         <button className="buttonGame" onClick={() => sendClick(0)}>Don't raise hand</button>
+  //       </>
+  //     case "numbers":
+  //       return <>
+  //         {numbers.map((val:number, index:number) => 
+  //           <button key={index} className="buttonGame" onClick={() => sendClick(val)}>{val}</button>
+  //         )}
+  //       </>
+  //     case "point":
+  //       return <>
+  //         {playerNames.map((name: string, index: number) => 
+  //           <button key={index} className="buttonGame" onClick={() => sendClick(index)}>{name}</button>
+  //         )}
+  //       </>
+  //     case "emoji":
+  //       return <>
+  //         <input type="text" value={emojiVal} onChange={handleEmojiChange} maxLength={2}/>
+  //         <button className="buttonGame" disabled={emojiVal == ""} onClick={() => sendClick(emojiVal)}>Submit</button>
+  //       </>
+  //   }
+  // }
 
   const voteButtons = useMemo(() => {
     return <div>
@@ -186,6 +281,8 @@ function Game() {
       <button className="buttonGame" onClick={() => sendGameChoice("hands")}>{getGameTypeString("hands")}</button>
       <button className="buttonGame" onClick={() => sendGameChoice("numbers")}>{getGameTypeString("numbers")}</button>
       <button className="buttonGame" onClick={() => sendGameChoice("point")}>{getGameTypeString("point")}</button>
+      <button className="buttonGame" onClick={() => sendGameChoice("emoji")}>{getGameTypeString("emoji")}</button>
+      <button className="buttonGame" onClick={() => sendGameChoice("percent")}>{getGameTypeString("percent")}</button>
     </>
   )
 
@@ -206,7 +303,8 @@ function Game() {
       display: "inline-block"
     }}>{phase == "gameover" ? "Game over" : ( phase == "choosing" ? "Choosing a game type": getGameTypeString(gameType))}</h2>
     <br/>
-
+    {timerImage}
+    <br/>
     {(phase === "choosing" && (!completedPhase)) && (chooserIndex == thisId) && (
       gameTypeButtons
     )}
@@ -214,7 +312,7 @@ function Game() {
     {phase === "answering" && !completedPhase && (
       <>
         <p className="textGame">{questionText}</p>
-        {questionChoiceButtonsHandler}
+        {questionChoiceButtons}
       </>
     )}
 

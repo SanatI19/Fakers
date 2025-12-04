@@ -13,6 +13,13 @@
   box-sizing: border-box;
 }
 
+.inputGame {
+  width: 80%;
+  font-size: 1.2rem;      /* prevents iOS zoom */
+  padding: 0.8rem;   /* gives finger space */
+  border-radius: 1rem;
+}
+
 .buttonGame {
   width: 80%;
   font-size: 1.2rem;
