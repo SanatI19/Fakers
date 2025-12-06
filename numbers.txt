@@ -79,3 +79,133 @@ how good is your music knowledge0
 how many hours of TV/movies do you watch per day0
 how satisfied were you with your most recent dining out experience0
 how good are you doing this game0
+the number of days you could survive without your phone1
+the number of times you hit “Snooze” this morning1
+the number of times today you’ve internally screamed1
+the number of secrets someone here knows about you1
+the number of days you think you’d last in a zombie apocalypse1
+the number of times today you questioned the meaning of life1
+the number of drinks you’ve had today1
+the number of great meals you’ve had this week1
+the number of meals you normally eat in a day1
+the number of times you laughed out loud at your phone today1
+the number of times today you’ve internally screamed1
+the number of times this week you’ve wondered “what am I doing with my life."1
+the number of people here you’d trust with your phone for 1 minute1
+the number of times someone here has roasted you in the past 1 hour1
+the number of times you’ve bailed on plans with this group this month1
+the number of hobbies you’ve started and abandoned this year1
+the number of outfits you tried on before deciding today1
+the number of times you said yes when you wanted to say no this week1
+the number of impulsive decisions you made this month1
+the number of goals you actually stuck with this year1
+the number of goals you are seriously pursuing right now1
+the number of times you’ve imagined quitting everything and starting fresh1
+the number of people here you think you could beat in a physical fight1
+the number of times you’ve eaten something off the floor in the past year1
+the number of times you’ve dropped your phone this week1
+the number of times you said “never again” and then did it again1
+the number of things you regret buying this month1
+the number of >$100 purchases you’ve made this month1
+the number of times you made coffee or tea today1
+the number of errands you still need to do today1
+the number of times you checked the weather today1
+the number of times you restarted a sentence because it sounded weird1
+in tens of minutes, how long it takes you to eat a meal1
+the number of times you liked your own joke more than everyone else did today1
+the number of times you fake-laughed in the last few hours1
+the number of people here you think you could beat in a running race1
+the number of people here you think you could beat in a speed eating contest1
+the number of people here you think are kinder than you1
+the number of friends here who could expose you with screenshots1
+the number of habits you’re trying to break1
+the number of days this week you’d say you were actually productive1
+the number of foods you absolutely refuse to eat1
+the number of weird dreams you remember from this week1
+the number of keys you regularly carry1
+the number of streaming services you actively use1
+the number of meals you actually cook yourself in a typical day1
+the number of water bottles you own that you actually use1
+the number of TV shows you’re currently watching1
+the number of nicknames you’ve been given that stuck1
+the number of distinct careers you think you’d actually enjoy1
+the number of pets you’ve owned in your life1
+the number of major injuries you’ve had1
+the number of languages you can speak even a little1
+the number of conspiracy theories you kinda believe1
+the number of terrible hairstyles you’ve had1
+the number of instruments you’ve ever attempted to learn1
+the number of beliefs you hold that almost no one else around you shares1
+the number of places that feel like home to you1
+the number of people here you’d lend money to without thinking twice1
+the number of people here you’ve known for more than five years1
+the number of people here who have annoyed you in the past 3 hours1
+the number of people here you’ve traveled with1
+the number of people you’ve had a long conversation alone with1
+the number of people here who’ve ever given you genuinely good advice1
+the number of people here you thought were intimidating when you first met them1
+the number of people here you misjudged at first1
+the number of people here you could live with without going insane1
+the number of people here you’d want on your team in a competition1
+the number of people here you’ve lost a bet to1
+the number of skills you’ve learned on your own just for fun1
+the number of continents you’d move to without hesitation1
+the number of times you’ve felt proud of someone in this group today1
+the number of people here who are more competitive than you1
+the number of things you’d confidently teach someone else how to do1
+the number of people here you think would thrive living alone1
+the number of people here you think you’d beat in an arm wrestle1
+the number of people here you think you’re funnier than1
+the number of people here you trust to stay calmer than you in a stressful moment1
+the number of people here you think you could out-strategize in a board game1
+the number of people here you think you wake up earlier than1
+the number of people here you think you could talk into trying something new1
+the number of people here you think are more stubborn than you1
+the number of people here you think you could beat in a cooking challenge1
+the number of people here you think you could out-meme in a group chat1
+the number of people here you’d beat in a “don’t laugh” challenge1
+the number of people here you could convince to switch sides in an argument just for fun1
+the number of people here you’d beat in a “guess the song” challenge1
+the number of people here you think would lose a fight with a mildly angry goose1
+the number of people here you’d beat in a trivia round about random facts1
+the number of people here you think you would beat at mental math1
+the number of people here you’d outperform in a reaction-time challenge1
+the number of people here you think you’re more observant than1
+the number of people here who you think you’re better at estimating things than1
+the number of people here you think you could out-draw in a doodle contest1
+the number of people here you think you could beat in a paper-airplane challenge1
+the number of people here you think you’d beat in a balance-on-one-foot contest1
+the number of people here you could beat in a jumping-distance challenge1
+the number of people here you’d out-steady in a “don’t drop the object” challenge1
+the number of people here you think you’d last longer than in a plank1
+the number of people here you think you’re stronger than overall1
+the number of people here you’d beat in a wall-sit contest1
+the number of people here you think you communicate instructions better than1
+the number of people here you think would be a better teacher than you1
+the number of people here you’re more organized than (in general)1
+the number of people here whose schedules you think are more chaotic than yours1
+the number of people here whose memory you think is better than yours1
+the number of people here who drink more caffeine than you1
+the number of people here who stay up later than you on average1
+the number of people here you think care more about fashion than you do1
+the number of people here who you think listen to more music than you daily1
+the number of people here who enjoy alone time more than you do1
+the number of people here who are more outdoorsy than you1
+the number of people here who you think cook at home more than you1
+the number of people here you think exercise more frequently than you1
+the number of people here who you think read more than you1
+the number of people here who play more games than you1
+the number of people here who watch more shows than you1
+the number of people here who spend more time on their phone than you1
+the number of people here whose music taste you think is more varied than yours1
+the number of people here who you think follow news/current events more1
+the number of people here who like planning trips more than you do1
+the number of people here who you think shop online more than you1
+the number of people here who probably spend more time getting ready than you1
+the number of people here you think drink water more consistently than you1
+the number of people here who eat more than you1
+the number of people here you think eat out more often than you1
+the number of people here who you think follow sports more closely than you1
+the number of people here who you think listen to podcasts more than you1
+the number of people here who you think have seen more movies than you1
+the number of people here you think enjoy puzzles or brain games more than you1

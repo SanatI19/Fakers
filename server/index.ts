@@ -56,6 +56,9 @@ const emojisTasks = dataEmojis.split("\n");
 const dataPercent = readFileSync("../percent.txt", "utf-8");
 const percentTasks = dataPercent.split("\n");
 
+const fakerScoreRound = [200,250,300]
+const nonFakerScoreRound = [250,200,150]
+
 function resetChoiceArray(room: string) {
     games[room].choiceArray = Array(games[room].playerArray.length).fill(-1);
 }
@@ -733,9 +736,34 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         }
     }
 
+    // function calculateFakerScore(room: string,index: number): number {
+    //     const storedChoices = games[room].storedChoices;
+    //     let outNum = 200*storedChoices[0].length;
+    //     const votedFor = Array(storedChoices[0].length).fill(0);
+
+    //     for (let i = 0; i< storedChoices.length; i++) {
+    //         if (i == games[room].fakerIndex) {
+    //             continue;
+    //         }
+    //         for (let j = 0; j < storedChoices[0].length; j++) {
+    //             votedFor[j] += storedChoices[i][j] == games[room].fakerIndex ? 1 : 0;
+    //         }
+    //     }
+    //     for (let i = 0; i < votedFor.length; i++) {
+    //         if (i == votedFor.length-1 && games[room].fakerCaught) {
+    //             outNum -= 200;
+    //         }
+    //         else {
+    //             outNum -= 100*1/(games[room].playerArray.length-1)*votedFor[i];
+    //         }
+    //     }
+    //     return outNum
+    // }
+
     function calculateFakerScore(room: string,index: number): number {
         const storedChoices = games[room].storedChoices;
-        let outNum = 200*storedChoices[0].length;
+        // let outNum = 200*storedChoices[0].length;
+        let outNum = 0;
         const votedFor = Array(storedChoices[0].length).fill(0);
 
         for (let i = 0; i< storedChoices.length; i++) {
@@ -747,11 +775,10 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             }
         }
         for (let i = 0; i < votedFor.length; i++) {
-            if (i == votedFor.length-1 && games[room].fakerCaught) {
-                outNum -= 200;
-            }
-            else {
-                outNum -= 100*1/(games[room].playerArray.length-1)*votedFor[i];
+            if (!(i == votedFor.length-1 && games[room].fakerCaught)) {
+                outNum += fakerScoreRound[i]
+                outNum += 10*(Math.round(10/(games[room].playerArray.length-1)*votedFor[i]));
+                // outNum -= 100*1/(games[room].playerArray.length-1)*votedFor[i];
             }
         }
         return outNum
@@ -759,7 +786,8 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
 
     function calculateNonFakerScore(room: string,index: number): number {
         const storedChoices = games[room].storedChoices;
-        let outNum = 20*(games[room].playerArray.length-2)*storedChoices[0].length;
+        // let outNum = 20*(games[room].playerArray.length-2)*storedChoices[0].length;
+        let outNum = 0
         const votedFor: number[] = Array(storedChoices[0].length).fill(0);
         const successfullyVotedFor: boolean[] = Array(storedChoices[0].length).fill(false);
         const correctVote : boolean[] = Array(storedChoices[0].length).fill(false);
@@ -782,11 +810,8 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         }
 
         for (let i= 0; i< successfullyVotedFor.length; i++) {
-            if (successfullyVotedFor[i]) {
-                outNum -= 20*(games[room].playerArray.length-2)
-            }
-            else {
-                outNum += correctVote[i] ? (games[room].fakerCaught ? 300 : 200): 0;
+            if (!successfullyVotedFor[i]) {
+                outNum += correctVote[i] ? (nonFakerScoreRound[i]): 0;
             }
         }
         return outNum
