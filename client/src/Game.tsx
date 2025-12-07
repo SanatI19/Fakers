@@ -154,6 +154,7 @@ function Game() {
 
   useEffect(() => {
     if (!endTime || phase == "scoring" || phase == "gameover" || phase == "reveal") return;
+    setRemaining(Math.max(0,endTime-Date.now()))
     const interval = setInterval(() => {
       const now = Date.now();
       const diff = Math.max(0, endTime - now);
