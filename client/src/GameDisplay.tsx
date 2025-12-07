@@ -81,7 +81,8 @@ const gradients = [
   { id: "purple", start: "rgb(151, 106, 255)", end: "rgb(181, 149, 255)"},
   { id: "yellow", start: "rgb(249, 252, 99)", end: "rgb(253, 255, 153)"},
   { id: "red", start: "rgb(250, 103, 103)", end: "rgb(255, 157, 157)"},
-
+  { id: "navy", start: "rgb(30, 60, 255)", end: "rgb(91, 113, 255)"},
+  // { id: "navy", start: "rgb(89, 252, 151)", end: "rgb(254, 205, 44)"},
 ];
 
 function getBannerColor(type: GameType, phase: Phase) : string {

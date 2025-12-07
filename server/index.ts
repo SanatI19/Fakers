@@ -611,7 +611,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         const roomId = socketToRoom[socket.id];
         if (roomId !== undefined && games[roomId] !== undefined) {
             const index = games[roomId].sockets.indexOf(socket.id);
-            console.log(index)
             if (index >= 0) {
                 games[roomId].playerArray[index].connected = false;
                 io.to(roomId).emit("changeConnected",games[roomId].playerArray);
