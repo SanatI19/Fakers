@@ -1,0 +1,378 @@
+I enjoy being the center of attention.
+I make decisions quickly without overthinking.
+I find it easy to stay calm in stressful situations.
+I prefer planning over spontaneity.
+I get bored easily.
+I consider myself highly adaptable.
+I’m good at reading people’s emotions.
+I often second-guess myself.
+I like taking risks.
+I learn best through hands-on experience.
+I tend to procrastinate.
+I enjoy trying new hobbies.
+I’m comfortable expressing vulnerability.
+I usually see the bright side of situations.
+I need a lot of alone time to recharge
+I find it easy to strike up conversations with strangers.
+I prefer small gatherings over large events.
+I think I’m a good listener.
+I avoid conflict whenever possible.
+I care about others’ opinions of me.
+I’m usually the one who initiates plans.
+I get overwhelmed in large social settings.
+I enjoy deep conversations more than small talk.
+I judge people quickly without meaning to.
+I like being part of group projects.
+I’m comfortable asking for help.
+I tend to forgive people easily.
+I enjoy giving advice.
+I struggle with setting boundaries.
+I prefer leading rather than following.
+I enjoy waking up early.
+I stick to healthy habits consistently.
+I like having a daily routine.
+I spend money impulsively.
+I prefer staying home over going out.
+I’m good at keeping my space organized.
+I work better under pressure.
+I need background noise while working.
+I enjoy cooking.
+I often multitask.
+I check my phone too often.
+I like learning new skills in my free time.
+I enjoy physical exercise.
+I drink too much caffeine.
+I work better late at night.
+I enjoy trying new types of food.
+I prefer movies over TV shows.
+I enjoy reading books regularly.
+
+
+I prefer listening to podcasts over music.
+I like going on spontaneous trips.
+I enjoy being outdoors more than indoors.
+I like learning about other cultures.
+I prefer minimalism over having lots of stuff.
+I like competitive games.
+I prefer warm weather over cold weather.
+I enjoy attending live events.
+I like decorating my living space.
+I enjoy doing creative projects.
+I like being in fast-paced environments.
+I prefer relaxing vacations over adventurous ones.
+I believe people are generally trustworthy.
+I think most problems can be solved with communication.
+I believe hard work matters more than talent.
+I think luck plays a big role in success.
+I believe people deserve second chances.
+I think technology improves life more than it harms it.
+I believe honesty is always the best policy
+I think society pressures people too much to be productive.
+I believe most conflicts come from misunderstandings.
+I believe people should prioritize their mental health more.
+I think social media has a mostly negative impact.
+I believe travel is essential for personal growth.
+I think humor is one of the most important traits in a person.
+I believe routines make life better.
+I think everyone should have a creative outlet.
+I finish tasks as soon as I get them.
+I get distracted easily.
+I avoid taking on long-term commitments.
+I confront issues directly instead of letting them build up.
+I talk more than I listen.
+I rely heavily on intuition when making decisions.
+I adapt quickly to unexpected changes.
+I overanalyze situations.
+I express my emotions openly.
+I stick to my opinions even under pressure.
+I prefer structure over flexibility.
+I get stressed easily.
+I like being in charge.
+I often think about the future more than the present.
+I tend to prioritize others over myself.
+I believe breakfast food tastes better at night
+I think pets make life significantly better.
+I enjoy discussing hypothetical scenarios.
+I think board games are underrated.
+I believe napping is an essential life skill.
+I think villains are often more interesting than heroes.
+
+
+I enjoy learning random facts
+I think rainy days are underrated.
+I prefer staying in pajamas for most of the day when possible.
+I believe everyone should have a “comfort show.”
+I enjoy setting long-term goals for myself.
+I push myself harder when someone else is watching.
+I find it difficult to stay motivated without deadlines.
+I’m more driven by passion than practicality.
+I thrive when I’m competing with myself.
+I often start projects I never finish.
+I’m motivated by proving people wrong.
+I feel most productive when my schedule is packed.
+I get discouraged easily when things don’t go my way.
+I often take on more than I should.
+I enjoy solving puzzles.
+I understand concepts better when I explain them to someone else.
+I like thinking about abstract ideas.
+I prefer concrete facts over theories.
+I learn best by watching others.
+I often jump to conclusions.
+I like questioning traditional ways of doing things.
+I prefer learning through trial and error.
+I remember faces better than names.
+I enjoy analyzing situations from multiple perspectives.
+I tell stories in a dramatic way.
+I get socially drained faster than people think.
+I get secondhand embarrassment easily.
+I love inside jokes more than new ones.
+I talk too much when I’m nervous.
+I get attached to people quickly.
+I expect too much from the people I care about.
+I put effort into maintaining friendships.
+I value loyalty above all else in relationships.
+I enjoy meeting new people regularly.
+I think I’m good at comforting others.
+I prefer quality time over gifts or compliments.
+I prefer working in teams rather than alone.
+I often take leadership roles even when I don’t plan to.
+I stay calm during high-pressure tasks.
+I get frustrated when others don’t put in equal effort.
+I like brainstorming more than execution.
+I often go above and beyond expectations.
+I like being given creative freedom.
+I enjoy slow mornings.
+I need a lot more sleep than most people.
+I find clutter stressful.
+I like taking walks to clear my mind.
+I enjoy listening to background music no matter what I’m doing.
+I prefer staying up late even if I know I shouldn’t.
+I enjoy being busy more than being free.
+I’m good at remembering small details.
+I rely on technology more than I would like.
+I enjoy keeping up with new trends.
+I think digital communication can be as meaningful as in-person communication.
+I prefer texting over calling.
+I find it easy to disconnect from social media.
+I enjoy discovering new music regularly.
+I like watching long-form content more than short clips.
+I think technology makes relationships more complicated.
+I like planning for the future financially.
+I tend to spend money on experiences over things.
+I worry about finances more often than I admit.
+I enjoy taking financial risks when the payoff seems worth it.
+I prefer saving money instead of spending it.
+I enjoy learning about money and investing.
+I believe most people underestimate how important budgeting is.
+I talk to myself when I’m alone.
+I give random objects way too much sentimental value.
+I form strong opinions about fictional characters.
+I enjoy listening to the same song on repeat.
+I think shower thoughts are some of my smartest thoughts.
+I get emotionally attached to my favorite foods.
+I enjoy reorganizing things just for fun.
+I love people-watching in public places.
+I believe coincidences happen for a reason.
+I pick up on my own emotions quickly.
+I feel things more intensely than most people.
+I’m good at staying positive during setbacks.
+I get irritated by small things easily.
+I feel guilty even when I know I didn’t do anything wrong.
+I’m easily influenced by the mood of the room.
+I overthink emotional situations.
+I trust my gut more than logic.
+I take a long time to make important decisions.
+I often regret decisions after making them.
+I’m decisive even with limited information.
+I consider multiple possibilities before acting.
+I rely on advice from people I trust when making choices.
+I tend to choose the safest option.
+I change my mind often.
+I think I’m someone people can confide in.
+I struggle to stay in touch with friends consistently.
+I feel responsible for the happiness of people I care about.
+I form friendships quickly.
+I prefer friendships that feel low-maintenance.
+I enjoy being part of multiple different social circles.
+I feel uncomfortable when group plans aren’t organized.
+I find it difficult to unplug mentally from stress.
+I stress about things that are out of my control.
+I often take on other people’s stress without trying.
+I manage stress through hobbies or creative outlets.
+I prefer having one big goal over many small ones.
+I need a sense of purpose to stay motivated.
+I need external recognition to feel accomplished.
+I like reinventing myself every few years.
+I think personal growth requires discomfort.
+I enjoy expressing myself through art or creativity.
+I care a lot about aesthetics.
+I like making things from scratch.
+I enjoy thinking about how things could be improved.
+I enjoy imagining fictional worlds.
+I like collecting objects that inspire me.
+I believe people can change if they want to.
+I think everything happens for a reason.
+I think people underestimate the impact of kindness.
+I believe happiness requires intentional effort.
+I believe people exaggerate how busy they are.
+I think failures are essential for growth.
+I love having rituals or traditions, even small ones.
+I get too emotionally invested in TV shows.
+I enjoy hearing other people’s random stories.
+I feel most productive early in the morning.
+I often stay up later than I planned.
+I trust my instincts even when I can’t explain why.
+I often sense tension before anyone says anything.
+I ignore red flags more than I should.
+I like trying unfamiliar or exotic foods.
+I have strong opinions about what food is good.
+I enjoy cooking more than eating out.
+I feel more mentally clear after exercising.
+I enjoy learning new physical skills.
+I get restless when I sit still for too long.
+I prefer walking over driving when possible.
+I rely on caffeine to feel awake.
+I replay old memories often.
+I believe nostalgia makes experiences seem better than they were.
+I hold onto memories more than objects.
+I revisit old hobbies for comfort.
+I feel like time moves too quickly.
+I get impatient waiting for small things.
+I prefer doing things slowly and mindfully.
+I struggle to live in the moment.
+I prefer dim lighting over bright lighting.
+I’m sensitive to loud environments.
+I get overstimulated easily in busy settings.
+I prefer natural landscapes over cityscapes.
+I think tone is easily misunderstood in messages.
+I appreciate direct communication.
+I feel closely connected to my family.
+I feel pressure from family expectations.
+I enjoy having luxurious things even if I don’t need them.
+I often research purchases extensively before buying.
+I often reflect on who I used to be vs. who I am now.
+I question my own patterns of behavior.
+I believe people outgrow relationships naturally.
+I think people are more similar than they realize.
+I believe cultural differences deserve more appreciation.
+I think social norms change too slowly.
+I think people miscommunicate more often than they disagree.
+I believe the world feels noisier now than it used to.
+I believe AI will improve daily life.
+I think technology makes people feel more isolated.
+I think society adapts to new technology too quickly.
+I enjoy finding patterns in complex situations.
+I like breaking down problems step-by-step.
+I get frustrated when something doesn’t make sense.
+I enjoy debating ideas.
+I secretly enjoy being right more than being kind.
+I think most people exaggerate how good of a listener they are.
+I judge people based on their punctuality.
+I lose respect for people when they don’t follow through on plans.
+I think most group leaders enjoy the power more than they admit.
+I think oversharing is more common than good communication.
+I think being mysterious is more attractive than being open.
+I believe some friendships survive only out of convenience.
+I think people lie more often than they realize.
+I enjoy being underestimated because it gives me an advantage.
+I’m more dramatic in my head than in real life.
+I take things personally even when I know I shouldn’t.
+I replay the perfect comeback hours after an argument.
+I sometimes create problems by overthinking things that were fine.
+I like being the “surprisingly good” one at something.
+I get jealous faster than I show it.
+I care more about winning than I publicly admit.
+I get petty when I feel ignored.
+I sometimes want attention even when I claim I don’t.
+I think attraction can grow from someone’s personality alone.
+I lose interest quickly if conversations feel shallow.
+I pick up on romantic tension easily.
+I think emotional chemistry matters more than physical chemistry.
+I find confidence more attractive than appearance.
+I can tell when someone is flirting even if they deny it.
+I think most people settle too early in relationships.
+I pull away when someone gets too close too fast.
+I think compatibility is more rare than people think.
+I notice the smallest changes in someone I care about.
+I procrastinate even when I care a lot about the outcome.
+I clean when I’m angry as a form of revenge on my environment.
+I secretly enjoy hearing gossip even if I act like I don’t.
+I buy things to feel something.
+I act more confident than I feel in most situations.
+I believe people reveal their true character when they’re frustrated.
+I think most people are lonelier than they pretend to be.
+I think some people enjoy drama more than peace.
+I can tell within minutes if I’ll vibe with someone.
+I think people change their personality depending on who they’re with.
+I believe silence in conversations reveals more than words.
+I think most people don’t know what they truly want.
+I believe people unconsciously imitate those they admire.
+I think some people thrive on being misunderstood.
+I believe chaos is necessary for growth.
+I think comfort zones are more dangerous than risks.
+I believe most people choose stability at the cost of potential.
+I believe endings are more important than beginnings.
+I enjoy learning secrets even if they’re small.
+I judge myself harsher than anyone else does.
+I judge myself harsher than I judge others
+
+
+I crave recognition more than I admit.
+I get competitive with people who don’t even know we’re competing.
+I enjoy observing group dynamics more than participating.
+I get annoyed when people talk just to fill silence.
+I notice when someone’s compliment feels forced.
+I get more blunt when I’m tired.
+I exaggerate stories to make them more interesting.
+I overcommit to things when I’m in a good mood.
+I can tell when someone is slowly distancing themselves.
+I appreciate friends who call me out respectfully.
+I get suspicious when someone suddenly becomes very nice.
+I lose respect for people who never apologize.
+I find it unattractive when friends compete with each other.
+I care more about effort than frequency in friendships.
+I keep silent about some feelings to avoid hurting friends.
+I think people are more predictable than they think they are.
+I believe most people are afraid of being truly honest.
+I think charisma can make people overlook major flaws.
+I think people lie to protect their self-image.
+I believe most arguments stem from pride.
+I think people are more self-centered than they appear.
+I think people underestimate how powerful a single decision can be.
+I get suspicious when things are going too well.
+I notice patterns in people’s behavior without trying.
+I find it hard not to flirt when someone’s charming.
+I’ve stayed in a situation longer than I should because it felt comfortable.
+I sometimes pretend I don’t care way more than I actually don’t care.
+The “chase” is more fun than the relationship sometimes.
+I’d rather someone be too confident than too shy.
+I enjoy being the one with more emotional control in a relationship.
+I think some secrets genuinely do make people more interesting.
+I enjoy mild chaos as long as I’m not the one responsible for it.
+I support ghosting in very specific scenarios.
+I underestimate how much people actually like me.
+I find it difficult to accept compliments without deflecting.
+I hate being the first one to say “I miss you” in friendships.
+I like being the person people come to for advice.
+I think people fall in love more than once in their lifetime.
+I think some people genuinely mistake comfort for love.
+I think life gets easier the moment you accept it’s not supposed to be easy.
+I eat the same meals too often out of convenience.
+I avoid asking for help even when I clearly need it.
+I forgive people faster than I forgive myself.
+I feel like I play different “versions” of myself depending on the situation.
+I care more about social approval than I want to admit.
+I downplay my achievements because I’m afraid of seeming arrogant.
+I think intention matters as much as the outcome.
+I think loyalty has limits, even in close relationships.
+I think doing the right thing often comes with a personal cost.
+I believe moral “grey areas” are more common than clear rights/wrongs.
+I think people overestimate their own moral strength
+I believe most people act more out of fear than principle.
+I have trouble forgiving people who aren’t sorry.
+I’ve held grudges longer than necessary.
+I give second chances too easily.
+I struggle to apologize first.
+I believe people rarely understand themselves fully.
+I believe most people underestimate the impact they have on others.
+I think “closure” is something we create, not something we receive.

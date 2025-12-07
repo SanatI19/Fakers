@@ -56,6 +56,9 @@ const emojisTasks = dataEmojis.split("\n");
 const dataPercent = readFileSync("../percent.txt", "utf-8");
 const percentTasks = dataPercent.split("\n");
 
+const dataOpinion = readFileSync("../opinion.txt", "utf-8");
+const opinionTasks = dataOpinion.split("\n");
+
 const fakerScoreRound = [200,250,300]
 const nonFakerScoreRound = [250,200,150]
 
@@ -86,7 +89,7 @@ function newGameState(type: boolean):GameState {
         displaySocket: "", 
         classic: type, 
         gameType: "hands", 
-        pastChoices: {"hands": [], "point": [], "numbers": [], "emoji": [], "percent": []}, 
+        pastChoices: {"hands": [], "point": [], "numbers": [], "emoji": [], "percent": [], "opinion": []}, 
         question: "", 
         fakerIndex: -1, 
         phase: "choosing", 
@@ -159,6 +162,8 @@ function getPrefix(type: GameType, phrase: string) : string {
             return "Pick an emoji to describe "
         case "percent":
             return "What percent"
+        case "opinion":
+            return ""
     }
 }
 
@@ -179,6 +184,8 @@ function getRandomQuestion(room: string, type: GameType) : string {
             break;
         case "percent":
             file = percentTasks;
+        case "opinion":
+            file = opinionTasks;
             break;
     }   
     const question = randomizeChoice(room, type, file);
@@ -266,7 +273,7 @@ function removeTimers(room:string) : void {
     delete gameTimers[room];
 }
 
-function isInitial(pastChoices: {[type: string] : number[]}): boolean {
+function isInitial(pastChoices: Record<GameType,number[]>): boolean {
     if (pastChoices["hands"].length==0 
         && pastChoices["point"].length==0 
         && pastChoices["numbers"].length==0 
@@ -275,6 +282,27 @@ function isInitial(pastChoices: {[type: string] : number[]}): boolean {
             return true
         } 
     return false
+}
+
+function configurePastChoices(pastChoices: Record<GameType,number[]>): void {
+    if (!("hands" in pastChoices)) {
+       (pastChoices as Record<GameType,number[]>)["hands"] = [];
+    }
+    if (!("numbers" in pastChoices)) {
+       (pastChoices as Record<GameType,number[]>)["numbers"] = [];
+    }
+    if (!("point" in pastChoices)) {
+       (pastChoices as Record<GameType,number[]>)["point"] = [];
+    }
+    if (!("emoji" in pastChoices)) {
+       (pastChoices as Record<GameType,number[]>)["emoji"] = [];
+    }
+    if (!("percent" in pastChoices)) {
+       (pastChoices as Record<GameType,number[]>)["percent"] = [];
+    }
+    if (!("opinion" in pastChoices)) {
+       (pastChoices as Record<GameType,number[]>)["opinion"] = [];
+    }
 }
 
 
@@ -455,6 +483,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             socket.emit("failedToAccessRoom");
             return
         }
+        configurePastChoices(pastChoices)
         games[room].pastChoices = pastChoices;
     })
 
@@ -582,7 +611,8 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         const roomId = socketToRoom[socket.id];
         if (roomId !== undefined && games[roomId] !== undefined) {
             const index = games[roomId].sockets.indexOf(socket.id);
-            if (index > 0) {
+            console.log(index)
+            if (index >= 0) {
                 games[roomId].playerArray[index].connected = false;
                 io.to(roomId).emit("changeConnected",games[roomId].playerArray);
             }
@@ -703,8 +733,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             return
         }
         games[room].phase ="gameover";
-
-        console.log("GAME OVER")
         io.to(room).emit("getGameState",games[room]);
         removeTimers(room);
         resetRoomTimeout(room,1);

@@ -77,7 +77,7 @@ export interface IDisplayFunction {
 
 export type Phase = "choosing" | "answering" | "voting" | "reveal" | "scoring" | "gameover";
 
-export type GameType = "hands" | "numbers" | "point" | "emoji" | "percent";
+export type GameType = "hands" | "numbers" | "point" | "emoji" | "percent" | "opinion" ;
 
 export class Player {
     public deviceId: string;

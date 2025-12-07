@@ -42,7 +42,16 @@ const gametypeImageRefs: Record<GameType,string> = {
   "point": "/images/point.svg",
   "emoji": "/images/emoji.svg",
   "percent": "/images/percent.svg",
+  "opinion": "/images/opinion.svg",
 }
+
+const opinionRefs = [
+  "/images/strongAgree.svg",
+  "/images/agree.svg",
+  "/images/neutral.svg",
+  "/images/disagree.svg",
+  "/images/strongDisagree.svg"
+]
 
 function getGameTypeString(type: GameType) : string {
   switch(type) {
@@ -56,6 +65,8 @@ function getGameTypeString(type: GameType) : string {
       return "Emoji madness"
     case "percent":
       return "Give 110%"
+    case "opinion":
+      return "Agree to disagree"
   }
 }
 
@@ -69,6 +80,8 @@ const gradients = [
   { id: "pink", start: "rgb(252, 99, 240)", end: "rgb(255, 149, 246)"},
   { id: "purple", start: "rgb(151, 106, 255)", end: "rgb(181, 149, 255)"},
   { id: "yellow", start: "rgb(249, 252, 99)", end: "rgb(253, 255, 153)"},
+  { id: "red", start: "rgb(250, 103, 103)", end: "rgb(255, 157, 157)"},
+
 ];
 
 function getBannerColor(type: GameType, phase: Phase) : string {
@@ -89,6 +102,8 @@ function getBannerColor(type: GameType, phase: Phase) : string {
       return "url(#yellow)"
     case "percent":
       return "url(#purple)"
+    case "opinion":
+      return "url(#red)"
   }
 }
 
@@ -354,6 +369,16 @@ function GameDisplay() {
     ))
   ,[choiceArray])
 
+  const opinionImages : JSX.Element[] = useMemo(() => 
+      choiceArray.map((val,index) => (
+      typeof(val) === "number" && val != -1 ?
+      <g key={index}>
+        <image href={opinionRefs[val]} x={getPlayerX(index)+6} y={getPlayerY(index)} height={3} width={3}/>
+      </g>
+      : <g key={index}></g>
+    ))
+  ,[choiceArray]) 
+
   function answerImages(gameType : GameType) : JSX.Element[] {
     switch (gameType) {
       case "hands":
@@ -377,6 +402,11 @@ function GameDisplay() {
         return [<g key={1}>
           {playerImages}
           {percentImages}
+        </g>]
+      case "opinion":
+        return [<g key={1}>
+          {playerImages}
+          {opinionImages}
         </g>]
     }
   }

@@ -7,6 +7,14 @@ import { GameState, Player , Phase, GameType, ChoiceType} from "../../shared";
 import "./App.css";
 
 // const EMOJI_REGEX = /\p{Extended_Pictographic}/gu;
+const numbers = [0,1,2,3,4,5];
+const opinions = [
+  "Strongly agree",
+  "Agree",
+  "Neutral",
+  "Disagree",
+  "Strongly disagree"
+];
 
 const fakerText = "You are the faker, pick something random"
 
@@ -22,6 +30,8 @@ function getGameTypeString(type: GameType) : string {
       return "Emoji madness"
     case "percent":
       return "Give 110%"
+    case "opinion":
+      return "Agree to disagree"
   }
 }
 
@@ -43,6 +53,8 @@ function getBackgroundColor(type: GameType, phase: Phase) : string {
       return "rgb(249, 252, 99)"
     case "percent":
       return "rgb(151, 106, 255)"
+    case "opinion":
+      return "rgb(250, 103, 103)"
   }
 }
 
@@ -204,7 +216,7 @@ function Game() {
   }
   
   const questionChoiceButtons = useMemo(() => {
-    const numbers = [0,1,2,3,4,5];
+    console.log(opinions)
     switch (gameType) {
       case "hands":
         return <>
@@ -233,6 +245,12 @@ function Game() {
           <p>{percentVal}%</p>
           <input className="inputGame" type="range" min={0} max={100} value={percentVal} onChange={handlePercentChange}/>
           <button className="buttonGame" onClick={() => sendClick(percentVal)}>Submit</button>
+        </>
+      case "opinion":
+        return <>
+          {opinions.map((val:string, index: number) => 
+            <button key={index} className="buttonGame" onClick={()=> sendClick(index)}>{val}</button>
+          )}
         </>
     }
   },[gameType,emojiVal,percentVal])
@@ -283,6 +301,7 @@ function Game() {
       <button className="buttonGame" onClick={() => sendGameChoice("point")}>{getGameTypeString("point")}</button>
       <button className="buttonGame" onClick={() => sendGameChoice("emoji")}>{getGameTypeString("emoji")}</button>
       <button className="buttonGame" onClick={() => sendGameChoice("percent")}>{getGameTypeString("percent")}</button>
+      <button className="buttonGame" onClick={() => sendGameChoice("opinion")}>{getGameTypeString("opinion")}</button>
     </>
   )
 
