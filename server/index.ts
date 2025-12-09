@@ -161,7 +161,7 @@ function getPrefix(type: GameType, phrase: string) : string {
         case "emoji":
             return "Pick an emoji to describe "
         case "percent":
-            return "What percent"
+            return "What percent "
         case "opinion":
             return ""
     }
@@ -184,6 +184,7 @@ function getRandomQuestion(room: string, type: GameType) : string {
             break;
         case "percent":
             file = percentTasks;
+            break;
         case "opinion":
             file = opinionTasks;
             break;

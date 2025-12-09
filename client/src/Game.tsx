@@ -11,7 +11,9 @@ const numbers = [0,1,2,3,4,5];
 const opinions = [
   "Strongly agree",
   "Agree",
+  "Somewhat agree",
   "Neutral",
+  "Somewhat disagree",
   "Disagree",
   "Strongly disagree"
 ];
@@ -54,7 +56,8 @@ function getBackgroundColor(type: GameType, phase: Phase) : string {
     case "percent":
       return "rgb(151, 106, 255)"
     case "opinion":
-      return "rgb(250, 103, 103)"
+      // return "rgb(250, 103, 103)"
+      return "rgb(76, 76, 128)"
   }
 }
 
@@ -200,6 +203,8 @@ function Game() {
 
   function sendClick(choice: ChoiceType): void {
     socket.emit("sendChoice",room,thisId,choice);
+    setEmojiVal("")
+    setPercentVal(50)
   }
 
   function sendVote(index: number) : void {

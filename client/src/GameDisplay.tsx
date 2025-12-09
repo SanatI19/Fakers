@@ -48,7 +48,9 @@ const gametypeImageRefs: Record<GameType,string> = {
 const opinionRefs = [
   "/images/strongAgree.svg",
   "/images/agree.svg",
+  "/images/somewhatAgree.svg",
   "/images/neutral.svg",
+  "/images/somewhatDisagree.svg",
   "/images/disagree.svg",
   "/images/strongDisagree.svg"
 ]
@@ -77,11 +79,11 @@ const gradients = [
   { id: "orange", start:"rgb(227, 147, 61)", end: "rgb(228, 123, 11)"},
   { id: "green", start: "rgb(103, 230, 105)", end: "rgb(49, 230, 52)" },
   { id: "blue", start: "rgb(85, 198, 255)", end: "rgb(0, 166, 249)"},
-  { id: "pink", start: "rgb(252, 99, 240)", end: "rgb(255, 149, 246)"},
-  { id: "purple", start: "rgb(151, 106, 255)", end: "rgb(181, 149, 255)"},
-  { id: "yellow", start: "rgb(249, 252, 99)", end: "rgb(253, 255, 153)"},
-  { id: "red", start: "rgb(250, 103, 103)", end: "rgb(255, 157, 157)"},
-  { id: "navy", start: "rgb(30, 60, 255)", end: "rgb(91, 113, 255)"},
+  { id: "pink", end: "rgb(252, 99, 240)", start: "rgb(255, 149, 246)"},
+  { id: "purple", end: "rgb(151, 106, 255)", start: "rgb(181, 149, 255)"},
+  { id: "yellow", end: "rgb(249, 252, 99)", start: "rgb(253, 255, 153)"},
+  { id: "red", end: "rgb(250, 103, 103)", start: "rgb(255, 157, 157)"},
+  { id: "navy", end: "rgb(40, 40, 128)", start: "rgb(76, 76, 128)"},
   // { id: "navy", start: "rgb(89, 252, 151)", end: "rgb(254, 205, 44)"},
 ];
 
@@ -104,7 +106,7 @@ function getBannerColor(type: GameType, phase: Phase) : string {
     case "percent":
       return "url(#purple)"
     case "opinion":
-      return "url(#red)"
+      return "url(#navy)"
   }
 }
 
@@ -374,7 +376,7 @@ function GameDisplay() {
       choiceArray.map((val,index) => (
       typeof(val) === "number" && val != -1 ?
       <g key={index}>
-        <image href={opinionRefs[val]} x={getPlayerX(index)+6} y={getPlayerY(index)} height={3} width={3}/>
+        <image href={opinionRefs[val]} x={getPlayerX(index)+6} y={getPlayerY(index)} height={val == 0 || val == 6 ? 5: 3} width={val == 0 || val == 6 ? 5: 3}/>
       </g>
       : <g key={index}></g>
     ))
