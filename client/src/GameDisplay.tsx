@@ -759,7 +759,7 @@ function GameDisplay() {
     else if (showScores) {
       return showScoreImages;
     }
-    else {return <text y={10}>Neither</text>}
+    else {return null}
   },[showFaker,showScores,showPastQuestions,dispScores,roundQuestions,fakerIndex,playerNames])
 
   const victoryScreen = useMemo(() => {

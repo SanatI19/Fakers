@@ -33,9 +33,26 @@ function PreGame() {
     socket.emit("sendName", name, thisId,room);
   }
 
+  // useEffect(() => {
+  //   let playerUUID = sessionStorage.getItem("playerUUID");
+  //   let deviceUUID = localStorage.getItem("deviceUUIDlawlessForever");
+  //   if (playerUUID === null) {
+  //       playerUUID = crypto.randomUUID();
+  //   }
+  //   if (deviceUUID === null) {
+  //     deviceUUID = crypto.randomUUID();
+  //   }
+  //   playerId = playerUUID;
+  //   sessionStorage.setItem("playerUUID",playerId);
+  //   deviceId = deviceUUID;
+  //   localStorage.setItem("deviceUUIDlawlessForever",deviceId);
+  //   socket.emit("joinPlayerArray", room, deviceId,playerId)
+  //   console.log("room changed")
+  // },[room])
+
   useEffect(() => {
     let playerUUID = sessionStorage.getItem("playerUUID");
-    let deviceUUID = localStorage.getItem("deviceUUIDlawlessForever");
+    let deviceUUID = localStorage.getItem("deviceUUIDfakersForever");
     if (playerUUID === null) {
         playerUUID = crypto.randomUUID();
     }
@@ -45,15 +62,14 @@ function PreGame() {
     playerId = playerUUID;
     sessionStorage.setItem("playerUUID",playerId);
     deviceId = deviceUUID;
-    localStorage.setItem("deviceUUIDlawlessForever",deviceId);
+    localStorage.setItem("deviceUUIDfakersForever",deviceId);
     socket.emit("joinPlayerArray", room, deviceId,playerId)
-  },[room])
-
-  useEffect(() => {
+    console.log("joining")
     socket.on("connect",() => {
       socket.emit("joinPlayerArray", room, deviceId,playerId)
+      console.log(room)
     })
-  },[])
+  },[room])
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -121,7 +137,7 @@ function PreGame() {
     }
 
     socket.on("sendPlayerArray",handleSendPlayerArray);
-    
+
     return () => {
       socket.off("sendPlayerArray",handleSendPlayerArray);
     }

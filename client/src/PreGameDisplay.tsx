@@ -21,7 +21,7 @@ function PreGameDisplay() {
 
   useEffect(() => {
       let playerUUID = sessionStorage.getItem("playerUUID");
-      let deviceUUID = localStorage.getItem("deviceUUIDlawlessForever");
+      let deviceUUID = localStorage.getItem("deviceUUIDfakersForever");
       if (playerUUID === null) {
         playerUUID = crypto.randomUUID();
         playerId = playerUUID;
@@ -30,7 +30,7 @@ function PreGameDisplay() {
       if (deviceUUID === null) {
         deviceUUID = crypto.randomUUID();
         deviceId = deviceUUID;
-        localStorage.setItem("deviceUUIDlawlessForever",deviceId);
+        localStorage.setItem("deviceUUIDfakersForever",deviceId);
       }
 
       socket.emit("joinDisplaySocket", room, deviceId, playerId);

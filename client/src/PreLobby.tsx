@@ -12,12 +12,12 @@ function PreLobby() {
 
   playerId = crypto.randomUUID();
   sessionStorage.setItem("playerUUID", playerId);
-  let deviceIdTemp = localStorage.getItem("deviceUUIDlawlessForever");
+  let deviceIdTemp = localStorage.getItem("deviceUUIDfakersForever");
   if (deviceIdTemp === null) {
     deviceIdTemp = crypto.randomUUID();
   }
   deviceId = deviceIdTemp;
-  localStorage.setItem("deviceUUIDlawlessForever", deviceId);
+  localStorage.setItem("deviceUUIDfakersForever", deviceId);
 
   const joinRoom = () => {
     console.log(deviceId);
@@ -51,7 +51,7 @@ function PreLobby() {
     const handleUnableToCreateRoom = () => {
         setErr("Unable to create room, server full.");
     };
-    
+
     socket.on("enterExistingRoom",handleEnterExistingRoom)
     socket.on("unableToCreateRoom", handleUnableToCreateRoom);
     return () => {
