@@ -298,7 +298,7 @@ function Game() {
       <br/><br/><br/>
       <button className="buttonGame" disabled={voteLocked || voteIndex == -1} style={{backgroundColor: "rgb(255, 74, 74)", opacity: voteLocked || voteIndex == -1 ? 0.5: 1}} onClick={lockVote}>{"Lock vote"}</button>
     </div>
-  },[playerNames,voteIndex,voteLocked])
+  },[thisId,playerNames,voteIndex,voteLocked])
 
   const gameTypeButtons: JSX.Element = (
     <>

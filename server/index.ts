@@ -608,16 +608,16 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].endTime = endTime;
     }
 
-    socket.on("disconnect", (reason) => {
-        const roomId = socketToRoom[socket.id];
-        if (roomId !== undefined && games[roomId] !== undefined) {
-            const index = games[roomId].sockets.indexOf(socket.id);
-            if (index >= 0) {
-                games[roomId].playerArray[index].connected = false;
-                io.to(roomId).emit("changeConnected",games[roomId].playerArray);
-            }
-        }
-    })
+    // socket.on("disconnect", (reason) => {
+    //     const roomId = socketToRoom[socket.id];
+    //     if (roomId !== undefined && games[roomId] !== undefined) {
+    //         const index = games[roomId].sockets.indexOf(socket.id);
+    //         if (index >= 0) {
+    //             games[roomId].playerArray[index].connected = false;
+    //             io.to(roomId).emit("changeConnected",games[roomId].playerArray);
+    //         }
+    //     }
+    // })
 
     function setTimer(room: string,input: IDisplayFunction, timer: number) {
         if (!games[room]) return;
