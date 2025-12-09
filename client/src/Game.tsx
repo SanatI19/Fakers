@@ -57,7 +57,7 @@ function getBackgroundColor(type: GameType, phase: Phase) : string {
       return "rgb(151, 106, 255)"
     case "opinion":
       // return "rgb(250, 103, 103)"
-      return "rgb(76, 76, 128)"
+      return "rgb(123, 123, 168)"
   }
 }
 

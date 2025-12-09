@@ -83,7 +83,7 @@ const gradients = [
   { id: "purple", end: "rgb(151, 106, 255)", start: "rgb(181, 149, 255)"},
   { id: "yellow", end: "rgb(249, 252, 99)", start: "rgb(253, 255, 153)"},
   { id: "red", end: "rgb(250, 103, 103)", start: "rgb(255, 157, 157)"},
-  { id: "navy", end: "rgb(40, 40, 128)", start: "rgb(76, 76, 128)"},
+  { id: "navy", end: "rgb(83, 83, 168)", start: "rgb(123, 123, 168)"},
   // { id: "navy", start: "rgb(89, 252, 151)", end: "rgb(254, 205, 44)"},
 ];
 

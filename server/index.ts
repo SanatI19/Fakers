@@ -150,7 +150,7 @@ function getPrefix(type: GameType, phrase: string) : string {
         case "hands":
             return "Raise your hand if "
         case "point":
-            return "Point at the player who "
+            return "Select the player who "
         case "numbers":
             if (phrase[phrase.length-1] == "0"){
                 return "On a scale of 0-5, "
