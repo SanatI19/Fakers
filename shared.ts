@@ -67,6 +67,7 @@ export interface GameState {
     votedIndex: number;
     fakerCaught: boolean;
     roundQuestions: string[];
+    roundAnswers: ChoiceType[][];
     votesNeeded: number;
     endTime: number;
 }

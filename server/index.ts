@@ -102,6 +102,7 @@ function newGameState(type: boolean):GameState {
         votedIndex: -1,
         fakerCaught: false,
         roundQuestions: [],
+        roundAnswers: [],
         votesNeeded: 0,
         endTime: 0,
     };
@@ -132,6 +133,25 @@ function updateStoredVotes(room: string) : void {
 
 function updateRoundQuestions(room:string) : void {
     games[room].roundQuestions.push(games[room].question);
+}
+
+function resetRoundAnswers(room: string) : void {
+    if (!games[room]) {return;}
+    games[room].roundAnswers = Array.from({ length: games[room].playerArray.length }, () => [])
+}
+
+function updateRoundAnswers(room: string, index: number, answer: ChoiceType) : void {
+    if (!games[room]) {return;}
+    games[room].roundAnswers[index].push(answer)
+}
+
+function completeRoundAnswers(room : string) : void {
+    if (!games[room]) {return;}
+    for (const arr of games[room].roundAnswers) {
+        if (arr.length != games[room].roundQuestions.length) {
+            arr.push("")
+        }
+    }
 }
 
 function generateRoomCode(): string {
@@ -510,6 +530,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         resetRoundQuestions(room);
         changeToChoosing(room);
         resetRoomTimeout(room,1);
+        resetRoundAnswers(room);
         games[room].round = 0;
         games[room].started = true;
         games[room].votesNeeded = Math.ceil(0.65*games[room].playerArray.length)
@@ -569,6 +590,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].choiceArray[id] = index;
         games[room].counter++;
         games[room].playerArray[id].completedPhase = true;
+        updateRoundAnswers(room,id,index);
         if (games[room].counter == games[room].playerArray.length) {
             changeToVoting(room)
         }
@@ -633,6 +655,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].phase = "choosing"
         resetRoomTimeout(room,1);
         resetStoredChoices(room);
+        resetRoundAnswers(room);
         resetRoundQuestions(room);
         games[room].fakerCaught = false;
         games[room].chooserIndex = getRandomPlayer(games[room].playerArray.length);
@@ -649,6 +672,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         }
         prepForAnswering(room,games[room].gameType)
         resetRoomTimeout(room,1);
+        updateRoundQuestions(room);
         setCountdown(room,ANSWER_TIMER);
         io.to(room).emit("getGameState",games[room])
         setTimer(room, changeToVoting,ANSWER_TIMER);
@@ -675,6 +699,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             return
         }
         resetRoomTimeout(room,1);
+        completeRoundAnswers(room);
         games[room].counter = 0;
         setAllIncomplete(games[room].playerArray);
         games[room].phase = "voting";
@@ -693,7 +718,6 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].round++;
         updateStoredVotes(room);
         removeTimers(room);
-        updateRoundQuestions(room);
         setAllIncomplete(games[room].playerArray);
         calculateVotes(room);
         io.to(room).emit("getGameState",games[room])

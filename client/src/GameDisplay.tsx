@@ -195,6 +195,8 @@ function GameDisplay() {
   const [endTime,setEndTime] = useState<number>(0);
   const [remaining, setRemaining] = useState<number>(0);
   const [chooserIndex, setChooserIndex] = useState<number>(0);
+  const [roundAnswers, setRoundAnswers] = useState<ChoiceType[][]>([]);
+  const [showAnswers, setShowAnswers] = useState<boolean[]>([]);
 
   const {state} = useLocation()
   const room = state.room;
@@ -230,6 +232,8 @@ function GameDisplay() {
       setVotesNeeded(gameState.votesNeeded);
       setEndTime(gameState.endTime);
       setChooserIndex(gameState.chooserIndex);
+      setRoundAnswers(gameState.roundAnswers);
+      setShowAnswers(Array(gameState.roundAnswers[0].length).fill(true))
       localStorage.setItem("fakersPastChoices",JSON.stringify(gameState.pastChoices))
     }
 
@@ -293,6 +297,8 @@ function GameDisplay() {
   //     <rect filter="url(#shadow)" x={1} y={39} rx={2} ry={2} width={98} height={10} fill={getBannerColor(gameType,phase)}/>
   //   </g>
   // },[gameType,phase])
+  console.log(showAnswers);
+  console.log(roundAnswers);
 
   const questionText = useMemo(() => {
     return <foreignObject x={15} y={3} width="80" height="15">
@@ -679,6 +685,22 @@ function GameDisplay() {
                 onAnimationComplete={index2 == storedChoices[index].length-1 ? goToScoring: doNothing}
               />
             )}
+            {/* {roundAnswers[index] && roundAnswers[index].map((answer, index3) => 
+              answer == "" && showAnswers[index3] ? null : 
+              <motion.image key={index3}
+                // href={answer}
+                x={getAnsweredX(playerIndex[index])}
+                y={getAnsweredY}
+                initial={{height: 0, width:0,opacity:0.999}}
+                animate={{height:2, width:2, opacity:1}}
+                transition={{
+                  height: {delay: 2 + 5*index3, duration:0.2},
+                  width: {delay: 2 + 5*index3, duration:0.2},
+                  opacity: {delay: 5+ 5*index3, duration: 0.1}
+                }}
+                onAnimationComplete={() => setShowAnswers([...showAnswers.slice(0, index3), false, ...showAnswers.slice(index3 + 1)])}
+              />
+            )} */}
 
           </g>
         ) : (null)
