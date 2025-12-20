@@ -679,6 +679,22 @@ function GameDisplay() {
                 onAnimationComplete={index2 == storedChoices[index].length-1 ? goToScoring: doNothing}
               />
             )}
+            {/* {roundAnswers[index] && roundAnswers[index].map((answer, index3) => 
+              answer == "" && showAnswers[index3] ? null : 
+              <motion.image key={index3}
+                // href={answer}
+                x={getAnsweredX(playerIndex[index])}
+                y={getAnsweredY}
+                initial={{height: 0, width:0,opacity:0.999}}
+                animate={{height:2, width:2, opacity:1}}
+                transition={{
+                  height: {delay: 2 + 5*index3, duration:0.2},
+                  width: {delay: 2 + 5*index3, duration:0.2},
+                  opacity: {delay: 5+ 5*index3, duration: 0.1}
+                }}
+                onAnimationComplete={() => setShowAnswers([...showAnswers.slice(0, index3), false, ...showAnswers.slice(index3 + 1)])}
+              />
+            )} */}
 
           </g>
         ) : (null)
@@ -737,7 +753,7 @@ function GameDisplay() {
     else if (showScores) {
       return showScoreImages;
     }
-    else {return <text y={10}>Neither</text>}
+    else {return null}
   },[showFaker,showScores,showPastQuestions,dispScores,roundQuestions,fakerIndex,playerNames])
 
   const victoryScreen = useMemo(() => {

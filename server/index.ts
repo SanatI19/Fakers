@@ -404,10 +404,10 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
                 games[room].sockets[index] = socket.id;
                 socket.emit("getPlayerIndex",index);
                 socket.emit("sendPlayerArray",playerArray);
-                if (!games[room].playerArray[index].connected) {
-                    games[room].playerArray[index].connected = true;
-                    io.to(room).emit("changeConnected",games[room].playerArray);
-                }
+                // if (!games[room].playerArray[index].connected) {
+                //     games[room].playerArray[index].connected = true;
+                //     io.to(room).emit("changeConnected",games[room].playerArray);
+                // }
             }
             else {
                 let rejoin = false;
@@ -425,10 +425,10 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
                     socket.emit("getPlayerIndex",index);
                     socket.emit("sendPlayerArray",playerArray);
                     games[room].sockets[index] = socket.id;
-                    if (!games[room].playerArray[index].connected) {
-                        games[room].playerArray[index].connected = true;
-                        io.to(room).emit("changeConnected",games[room].playerArray);
-                    }
+                    // if (!games[room].playerArray[index].connected) {
+                    //     games[room].playerArray[index].connected = true;
+                    //     io.to(room).emit("changeConnected",games[room].playerArray);
+                    // }
                 }
                 else {
                     index = playerArray.length;
@@ -527,10 +527,10 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             }
             else {
                 games[room].sockets[id] = socket.id;
-                if (!games[room].playerArray[id].connected) {
-                    games[room].playerArray[id].connected = true;
-                    io.to(room).emit("changeConnected",games[room].playerArray);
-                }
+                // if (!games[room].playerArray[id].connected) {
+                //     games[room].playerArray[id].connected = true;
+                //     io.to(room).emit("changeConnected",games[room].playerArray);
+                // }
             }
             socket.emit("getPlayerNames",games[room].playerArray);
             socket.emit("getGameState",games[room]);
