@@ -95,7 +95,12 @@ function PreGame() {
       }
 
       const handleStartGame = () => {
-        navigate(`/${room}/game`,{state :{room: room, id: thisId}})
+        if (thisId === undefined) {
+          navigate(`/`);
+        }
+        else {
+          navigate(`/${room}/game`,{state :{room: room, id: thisId}})
+        }
       }
 
       socket.on("getPlayerIndex", handleGetPlayerIndex);

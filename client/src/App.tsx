@@ -8,8 +8,8 @@ import Game from "./Game";
 import GameDisplay from "./GameDisplay";
 import { ServerToClientEvents, ClientToServerEvents } from "../../shared";
 
-// const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io("http://localhost:3500", {reconnection: true, reconnectionAttempts: Infinity, reconnectionDelay: 500,});
-const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io({reconnection: true, reconnectionAttempts: Infinity, reconnectionDelay: 500,});
+const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io("http://localhost:3500", {reconnection: true, reconnectionAttempts: Infinity, reconnectionDelay: 500,});
+// const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io({reconnection: true, reconnectionAttempts: Infinity, reconnectionDelay: 500,});
 
 
 export const SocketContext = createContext<Socket<ServerToClientEvents, ClientToServerEvents>>(socket);
@@ -17,8 +17,8 @@ export const SocketContext = createContext<Socket<ServerToClientEvents, ClientTo
 function App() {
   // Top-level socket: only one connection for the whole app
   const [socket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>(() =>
-  // io("http://localhost:3500", {reconnection: true, reconnectionAttempts: Infinity, reconnectionDelay: 500,})
-  io({reconnection: true, reconnectionAttempts: Infinity, reconnectionDelay: 500,})
+  io("http://localhost:3500", {reconnection: true, reconnectionAttempts: Infinity, reconnectionDelay: 500,})
+  // io({reconnection: true, reconnectionAttempts: Infinity, reconnectionDelay: 500,})
   );
 
   return (

@@ -404,10 +404,10 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
                 games[room].sockets[index] = socket.id;
                 socket.emit("getPlayerIndex",index);
                 socket.emit("sendPlayerArray",playerArray);
-                // if (!games[room].playerArray[index].connected) {
-                //     games[room].playerArray[index].connected = true;
-                //     io.to(room).emit("changeConnected",games[room].playerArray);
-                // }
+                if (!games[room].playerArray[index].connected) {
+                    games[room].playerArray[index].connected = true;
+                    io.to(room).emit("changeConnected",games[room].playerArray);
+                }
             }
             else {
                 let rejoin = false;
@@ -425,10 +425,10 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
                     socket.emit("getPlayerIndex",index);
                     socket.emit("sendPlayerArray",playerArray);
                     games[room].sockets[index] = socket.id;
-                    // if (!games[room].playerArray[index].connected) {
-                    //     games[room].playerArray[index].connected = true;
-                    //     io.to(room).emit("changeConnected",games[room].playerArray);
-                    // }
+                    if (!games[room].playerArray[index].connected) {
+                        games[room].playerArray[index].connected = true;
+                        io.to(room).emit("changeConnected",games[room].playerArray);
+                    }
                 }
                 else {
                     index = playerArray.length;
@@ -512,6 +512,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         resetRoomTimeout(room,1);
         games[room].round = 0;
         games[room].started = true;
+        games[room].joinable = false;
         games[room].votesNeeded = Math.ceil(0.65*games[room].playerArray.length)
     }
 
@@ -527,10 +528,10 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             }
             else {
                 games[room].sockets[id] = socket.id;
-                // if (!games[room].playerArray[id].connected) {
-                //     games[room].playerArray[id].connected = true;
-                //     io.to(room).emit("changeConnected",games[room].playerArray);
-                // }
+                if (!games[room].playerArray[id].connected) {
+                    games[room].playerArray[id].connected = true;
+                    io.to(room).emit("changeConnected",games[room].playerArray);
+                }
             }
             socket.emit("getPlayerNames",games[room].playerArray);
             socket.emit("getGameState",games[room]);
@@ -608,16 +609,16 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].endTime = endTime;
     }
 
-    // socket.on("disconnect", (reason) => {
-    //     const roomId = socketToRoom[socket.id];
-    //     if (roomId !== undefined && games[roomId] !== undefined) {
-    //         const index = games[roomId].sockets.indexOf(socket.id);
-    //         if (index >= 0) {
-    //             games[roomId].playerArray[index].connected = false;
-    //             io.to(roomId).emit("changeConnected",games[roomId].playerArray);
-    //         }
-    //     }
-    // })
+    socket.on("disconnect", (reason) => {
+        const roomId = socketToRoom[socket.id];
+        if (roomId !== undefined && games[roomId] !== undefined) {
+            const index = games[roomId].sockets.indexOf(socket.id);
+            if (index >= 0) {
+                games[roomId].playerArray[index].connected = false;
+                io.to(roomId).emit("changeConnected",games[roomId].playerArray);
+            }
+        }
+    })
 
     function setTimer(room: string,input: IDisplayFunction, timer: number) {
         if (!games[room]) return;

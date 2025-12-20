@@ -36,7 +36,7 @@ function PreLobby() {
             setErr(reason)
         }
         else {
-          if (reason == "join") {
+          if ((reason == "join") && (thisId != -1)) {
             navigate(`/${roomId}/game`,{state :{room: roomId, id: thisId}});
           }
           else if (reason == "display") {

@@ -91,6 +91,8 @@ function Game() {
   const room = state.room;
   const thisId = state.id;
 
+  console.log(thisId)
+
   useEffect(() => {
     socket.emit("requestInitialState", room, thisId)
   },[room])
