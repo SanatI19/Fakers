@@ -380,8 +380,8 @@ function Game() {
               position: "fixed",
               top: "1%",
               right: "1%",
-              width: "clamp(24px, 5vw, 60px)",   // min 24px, preferred 5vw, max 60px
-              height: "clamp(24px, 5vw, 60px)",
+              width: "clamp(10vw, 15vw, 100px)",   // min 24px, preferred 5vw, max 60px
+              height: "clamp(10vw, 15vw, 100px)",
               background: "transparent",
               border: "none",
               cursor: "pointer",
