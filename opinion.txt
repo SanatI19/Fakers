@@ -46,8 +46,6 @@ I work better late at night.
 I enjoy trying new types of food.
 I prefer movies over TV shows.
 I enjoy reading books regularly.
-
-
 I prefer listening to podcasts over music.
 I like going on spontaneous trips.
 I enjoy being outdoors more than indoors.
@@ -96,8 +94,6 @@ I enjoy discussing hypothetical scenarios.
 I think board games are underrated.
 I believe napping is an essential life skill.
 I think villains are often more interesting than heroes.
-
-
 I enjoy learning random facts
 I think rainy days are underrated.
 I prefer staying in pajamas for most of the day when possible.
@@ -315,8 +311,6 @@ I believe endings are more important than beginnings.
 I enjoy learning secrets even if they’re small.
 I judge myself harsher than anyone else does.
 I judge myself harsher than I judge others
-
-
 I crave recognition more than I admit.
 I get competitive with people who don’t even know we’re competing.
 I enjoy observing group dynamics more than participating.

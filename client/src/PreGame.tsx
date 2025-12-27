@@ -5,6 +5,8 @@ import { SocketContext } from "./App";
 import { Player } from "../../shared";
 
 let thisId: number;
+const settingsImage = "/images/settings.svg";
+const closeImage = "/images/close.svg";
 
 function PreGame() {
   const socket = useContext(SocketContext);
@@ -12,19 +14,46 @@ function PreGame() {
   const [length,setLength] = useState(Number);
   const [name,setName] = useState<string>("");
   const [nameChange, setNameChange] = useState<boolean>(false);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [answerTimer, setAnswerTimer] = useState<number>(30);
+  const [voteTimer, setVoteTimer] = useState<number>(90);
+  const [powerups, setPowerups] = useState<boolean>(false);
   const {state} = useLocation()
   const room = state.room;
-  console.log(room)
   let playerId : string;
   let deviceId : string;
   
   const triggerStartGame = () => {
+    if (thisId == 0) {
+      let answerTimerOut = answerTimer;
+      if (answerTimerOut > 200) {answerTimerOut = 200}
+      else if (answerTimerOut < 15) {answerTimerOut = 15}
+      let voteTimerOut = voteTimer;
+      if (voteTimerOut > 300) {answerTimerOut = 300}
+      else if (voteTimerOut < 30) {voteTimerOut = 30}
+      socket.emit("sendSettings",room,answerTimerOut,voteTimerOut,powerups);
+    }
     socket.emit("triggerStartGame",room)
   }
 
   const changeTheName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
     setNameChange(true);
+  }
+
+  const trySetAnswerTimer = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.value)
+    if (e.target.value == "") {
+      setAnswerTimer(15);
+    }
+    setAnswerTimer(parseInt(e.target.value))
+  }
+
+  const trySetVoteTimer = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value == "") {
+      setVoteTimer(30);
+    }
+    setVoteTimer(parseInt(e.target.value))
   }
 
   const changeName = (name: string) => {
@@ -82,7 +111,6 @@ function PreGame() {
       }
 
       const handleRemovePlayerFromLobby = (index: number, playerArray: Player[]) => {
-        console.log(index)
         if (thisId == index) {
           navigate(`/`);
         }
@@ -133,8 +161,58 @@ function PreGame() {
   },[name])
 
   return <div>
+    {showSettings ? (
+        <div className="overlay">
+          <h1>Game settings</h1>
+        {/* <div className="popup">
+          <div className="buttonCont" */}
+          <button
+            style={{
+              position: "fixed",
+              top: "1%",
+              right: "1%",
+              width: "clamp(24px, 5vw, 60px)",   // min 24px, preferred 5vw, max 60px
+              height: "clamp(24px, 5vw, 60px)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+            }}
+            onClick={() => setShowSettings(false)}
+          >
+            <svg width="100%" height="100%">
+              <image href={closeImage} height={"100%"} width={"100%"}/>
+            </svg>
+          </button>
+        <span>Answering timer: </span>
+        <input type="number" min={15} max={200} width={1} value={answerTimer} onChange={(e) => trySetAnswerTimer(e)}/>
+        <br/>
+        <span>Voting timer: </span>
+        <input type="number" min={30} max={300} width={5} value={voteTimer} onChange={(e) => trySetVoteTimer(e)}/>
+        <br/>
+        <span>Powerups?</span>
+        <input type="checkbox" checked={powerups} onChange={(e) => setPowerups(e.target.checked)}/>
+
+      </div>) : null}
       <div>
-        <input id="nameInput" autoComplete="off" type="text" maxLength={10} placeholder="Player name" value={name} onChange={(e) => 
+        {thisId == 0 ? (
+          <button
+            style={{
+              position: "fixed",
+              top: "1%",
+              right: "1%",
+              width: "clamp(24px, 5vw, 60px)",   // min 24px, preferred 5vw, max 60px
+              height: "clamp(24px, 5vw, 60px)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+            }}
+            onClick={() => setShowSettings(true)}
+          >
+            <svg width="100%" height="100%">
+              <image href={settingsImage} height={"100%"} width={"100%"}/>
+            </svg>
+          </button>): null}
+        <input id="nameInput" autoComplete="off" type="text" maxLength={8} placeholder="Player name" value={name} onChange={(e) => 
           changeTheName(e)}/>  
         <button disabled={!nameChange} onClick={() => changeName(name)}>Change name</button>
       </div>

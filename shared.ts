@@ -39,6 +39,7 @@ export interface ClientToServerEvents {
     triggerEndGame: (room: string) => void;
     sendEmoji: (room: string, id: number, emoji: string) => void;
     sendPastChoices: (room: string, pastChoices: Record<GameType,number[]>) => void;
+    sendSettings: (room: string, answerTimer: number, voteTimer: number, powers: boolean) => void;
 }
 
 export type ChoiceType = number | string;
@@ -69,6 +70,12 @@ export interface GameState {
     roundQuestions: string[];
     votesNeeded: number;
     endTime: number;
+
+    answerTimer: number;
+    voteTimer: number;
+    powerups: boolean;
+    powerType: PowerType;
+    roundPowerUsed: boolean;
 }
 
 export interface IDisplayFunction {
@@ -78,6 +85,8 @@ export interface IDisplayFunction {
 export type Phase = "choosing" | "answering" | "voting" | "reveal" | "scoring" | "gameover";
 
 export type GameType = "hands" | "numbers" | "point" | "emoji" | "percent" | "opinion" ;
+
+export type PowerType = "copycat" | "sabotage";
 
 export class Player {
     public deviceId: string;

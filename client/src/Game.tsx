@@ -3,7 +3,7 @@ import { useContext, useEffect, useState, useMemo, JSX} from "react";
 // import { motion } from "framer-motion";
 import { useLocation, useNavigate} from "react-router-dom";
 import { SocketContext } from "./App";
-import { GameState, Player , Phase, GameType, ChoiceType} from "../../shared";
+import { GameState, Player , Phase, GameType, ChoiceType, PowerType} from "../../shared";
 import "./App.css";
 
 // const EMOJI_REGEX = /\p{Extended_Pictographic}/gu;
@@ -17,6 +17,9 @@ const opinions = [
   "Disagree",
   "Strongly disagree"
 ];
+
+//NEED TO CHANGE THIS
+const fakerImage = "/images/faker.svg";
 
 const fakerText = "You are the faker, pick something random"
 
@@ -86,6 +89,10 @@ function Game() {
   const [percentVal, setPercentVal] = useState<number>(50);
   const [endTime,setEndTime] = useState<number>(0);
   const [remaining, setRemaining] = useState<number>(0);
+  const [powers, setPowers] = useState<boolean>(false);
+  const [powerType, setPowerType] = useState<PowerType>("copycat");
+  const [showPower, setShowPower] = useState<boolean>(false);
+  const [powerUsed, setPowerUsed] = useState<boolean>(false);
 
   const {state} = useLocation()
   const room = state.room;
@@ -138,6 +145,9 @@ function Game() {
       setVoteIndex(gameState.voteArray[thisId])
       setEndTime(gameState.endTime);
       setVoteLocked(gameState.voteLocked[thisId])
+      setPowers(gameState.powerups);
+      setPowerType(gameState.powerType);
+      setPowerUsed(gameState.roundPowerUsed);
     }
 
     const handleSocketDisconnect = () => {
@@ -169,6 +179,23 @@ function Game() {
     return () => clearInterval(interval);
   }, [endTime]);
 
+  useEffect(() => {
+    function updateVH() {
+      document.documentElement.style.setProperty(
+        "--vh",
+        window.innerHeight * 0.01 + "px"
+      );
+    }
+
+    updateVH();
+    window.addEventListener("resize", updateVH);
+
+    return () => window.removeEventListener("resize", updateVH);
+  }, []);
+
+  useEffect(() => {
+    setShowPower(false);
+  },[phase])
 
 
   const timerImage = useMemo(() => {
@@ -263,6 +290,17 @@ function Game() {
     }
   },[gameType,emojiVal,percentVal])
 
+  const powerButtons = useMemo(() => {
+    switch(powerType) {
+      case "copycat":
+        return <>
+        </>
+      case "sabotage":
+        return <>
+        </>
+    }
+    
+  },[powerType])
   // function questionChoiceButtons(type: GameType): JSX.Element {
   //   const numbers = [0,1,2,3,4,5];
   //   switch (type) {
@@ -332,6 +370,29 @@ function Game() {
     <br/>
     {timerImage}
     <br/>
+    {powers && phase === "choosing" && showPower && thisId == fakerIndex && !powerUsed && <div className="overlay">
+      {powerButtons}
+    </div>}
+    {/* INSERT IMAGE HERE OF A BUTTON THAT WILL MAKE IT SO THE OVERLAY APPEARS */}
+    {powers && phase === "answering" && thisId == fakerIndex && !showPower && !powerUsed && (
+          <button
+            style={{
+              position: "fixed",
+              top: "1%",
+              right: "1%",
+              width: "clamp(24px, 5vw, 60px)",   // min 24px, preferred 5vw, max 60px
+              height: "clamp(24px, 5vw, 60px)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+            }}
+            onClick={() => setShowPower(true)}
+          >
+            <svg width="100%" height="100%">
+              <circle cx="50%" cy="50%" r="43%" fill="white" stroke="black"></circle>
+              <image href={fakerImage} height={"75%"} width={"75%"} x={"12.5%"} y={"12.5%"}/>
+            </svg>
+          </button>)}
     {(phase === "choosing" && (!completedPhase)) && (chooserIndex == thisId) && (
       gameTypeButtons
     )}

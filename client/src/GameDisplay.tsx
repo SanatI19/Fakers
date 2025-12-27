@@ -84,6 +84,7 @@ const gradients = [
   { id: "yellow", end: "rgb(249, 252, 99)", start: "rgb(253, 255, 153)"},
   { id: "red", end: "rgb(250, 103, 103)", start: "rgb(255, 157, 157)"},
   { id: "navy", end: "rgb(83, 83, 168)", start: "rgb(123, 123, 168)"},
+  { id: "white", end: "rgb(197, 197, 197)", start: "rgb(255, 255, 255)"},
   // { id: "navy", start: "rgb(89, 252, 151)", end: "rgb(254, 205, 44)"},
 ];
 
@@ -295,7 +296,7 @@ function GameDisplay() {
   // },[gameType,phase])
 
   const questionText = useMemo(() => {
-    return <foreignObject x={15} y={3} width="80" height="15">
+    return <foreignObject x={15} y={3.2} width="80" height="15">
     <div
       style={{width:80, fontSize:2, wordWrap:"break-word",fontFamily: "Comic Sans MS", textAlign: "left"}}>
       {question}
@@ -334,8 +335,8 @@ function GameDisplay() {
       if (val < 0) return <g key={index}></g>
       counts[val]++;
       return (<g key={index}>
-        <image href={pointImage} x={getPlayerX(val)+6} y={getPlayerY(val)+2*(counts[val]-1)} height={2} width={2}/>
-        <text x={getPlayerX(val)+8.5} y={getPlayerY(val)-0.3+ 2*(counts[val]-1)+1.75} fontSize={1.25}>{playerNames[index]}</text>
+        <image href={pointImage} x={getPlayerX(val)+6} y={getPlayerY(val)+2*(counts[val]-1)-1} height={2} width={2}/>
+        <text x={getPlayerX(val)+8.5} y={getPlayerY(val)-0.3+ 2*(counts[val]-1)+0.75} fontSize={1.25}>{playerNames[index]}</text>
       </g>)
     }))}
   ,[choiceArray,playerNames])
@@ -862,6 +863,10 @@ function GameDisplay() {
           {!(phase == "scoring" && (showFaker || showPastQuestions)) && topBanner}
           {!(phase == "scoring" && showFaker) && bottomBanner}
           {timerImage}
+      </g>
+      <g>
+        <rect x="88.5" y="1.5" rx="1" ry="1" height={2} width={10} fill="url(#white)"/>
+        <text x="89" y="3" fontSize={1.5} fontWeight={"bold"}>Room: HFVO</text>
       </g>    
       <g>
         {(() => {

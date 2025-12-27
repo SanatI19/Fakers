@@ -3,7 +3,7 @@ import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import { instrument } from "@socket.io/admin-ui";
 import cors from "cors";
-import {ServerToClientEvents , ClientToServerEvents, Player, GameState, GameType, IDisplayFunction, ChoiceType} from "../shared";
+import {ServerToClientEvents , ClientToServerEvents, Player, GameState, GameType, IDisplayFunction, ChoiceType, PowerType} from "../shared";
 import path from "path";
 import { readFileSync } from "fs";
 
@@ -33,7 +33,7 @@ server.listen(PORT, () => {
 
 const roomCodeLength = 4;
 const MAX_PLAYERS = 10;
-const ROOM_TIMEOUT= 5*1000*60*60; // 5 min timer
+const ROOM_TIMEOUT= 30*1000*60; // 30 min timer
 const MAX_STORED_LENGTH = 40;
 const MAX_ROUNDS = 10;
 
@@ -104,6 +104,11 @@ function newGameState(type: boolean):GameState {
         roundQuestions: [],
         votesNeeded: 0,
         endTime: 0,
+        answerTimer: ANSWER_TIMER,
+        voteTimer: VOTE_TIMER,
+        powerups: false,
+        powerType: "copycat",
+        roundPowerUsed: false,
     };
 }
 
@@ -214,14 +219,31 @@ function getRandomPlayer(num: number) : number {
 }
 
 function getRandomGameType() : GameType {
-    const index = Math.floor(3*Math.random())
+    const index = Math.floor(6*Math.random())
     switch (index) {
         case 0:
             return "hands";
         case 1:
             return "numbers";
+        case 2:
+            return "emoji";
+        case 3:
+            return "opinion";
+        case 4:
+            return "percent";
         default:
             return "point";
+    }
+}
+
+function getRandomPower() : PowerType {
+    const index = Math.floor(2*Math.random())
+    switch (index) {
+        case 0:
+            return "copycat";
+        default: 
+            return "sabotage";
+
     }
 }
 
@@ -479,6 +501,16 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         io.to(room).emit("startGame");
     })
 
+    socket.on("sendSettings", (room: string, answerTimer: number, voteTimer: number, powers: boolean) => {
+        if (!games[room]) {
+            socket.emit("failedToAccessRoom");
+            return
+        }
+        games[room].answerTimer = answerTimer*1000;
+        games[room].voteTimer = voteTimer*1000;
+        games[room].powerups = powers;
+    })
+
     socket.on("sendPastChoices", (room: string, pastChoices: Record<GameType,number[]>) => {
         if (!games[room]) {
             socket.emit("failedToAccessRoom");
@@ -638,6 +670,9 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].fakerCaught = false;
         games[room].chooserIndex = getRandomPlayer(games[room].playerArray.length);
         games[room].fakerIndex = getRandomPlayer(games[room].playerArray.length);
+        if (games[room].powerups) {
+            games[room].powerType = getRandomPower();
+        }
         setCountdown(room,CHOOSING_TIMER);
         io.to(room).emit("getGameState",games[room])
         setTimer(room,changeToAnsweringAfterTimer,CHOOSING_TIMER) 
@@ -650,9 +685,13 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         }
         prepForAnswering(room,games[room].gameType)
         resetRoomTimeout(room,1);
-        setCountdown(room,ANSWER_TIMER);
+        let answerTimer = games[room].answerTimer;
+        if (games[room].gameType == "emoji") {
+            answerTimer += 15*1000
+        }
+        setCountdown(room,answerTimer);
         io.to(room).emit("getGameState",games[room])
-        setTimer(room, changeToVoting,ANSWER_TIMER);
+        setTimer(room, changeToVoting,answerTimer);
     }
 
     function changeToAnsweringAfterTimer(room: string) : void {
@@ -664,9 +703,13 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].phase = "answering"
         games[room].gameType = getRandomGameType();
         prepForAnswering(room,games[room].gameType)
-        setCountdown(room,ANSWER_TIMER);
+        let answerTimer = games[room].answerTimer;
+        if (games[room].gameType == "emoji") {
+            answerTimer += 15*1000
+        }
+        setCountdown(room,answerTimer);
         io.to(room).emit("getGameState",games[room])
-        setTimer(room,changeToVoting,ANSWER_TIMER)
+        setTimer(room, changeToVoting,answerTimer);
     }
 
 
@@ -679,9 +722,9 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].counter = 0;
         setAllIncomplete(games[room].playerArray);
         games[room].phase = "voting";
-        setCountdown(room,VOTE_TIMER);
+        setCountdown(room,games[room].voteTimer);
         io.to(room).emit("getGameState",games[room])
-        setTimer(room,changeToReveal,VOTE_TIMER)
+        setTimer(room,changeToReveal,games[room].voteTimer);
     }
 
     function changeToReveal(room: string) : void {
