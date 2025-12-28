@@ -109,6 +109,10 @@ function newGameState(type: boolean):GameState {
         powerups: false,
         powerType: "copycat",
         roundPowerUsed: false,
+        powerTargetIndex: -1,
+        pointSelfChooseAllowed: true,
+        turnsPerRound: 3,
+        totalTurns: MAX_ROUNDS,
     };
 }
 
@@ -125,7 +129,18 @@ function deleteRoom(room: string) {
         delete gameoverTimers[room]
     };
 
+    if (!games[room]) {
+        return;
+    }
+
     io.to(room).emit("failedToAccessRoom");
+
+    for (const socketId of games[room].sockets) {
+        const socket = io.sockets.sockets.get(socketId);
+        socket?.leave(room);
+        socket?.disconnect(true);
+    }
+
     delete games[room];
 }
 
@@ -237,12 +252,14 @@ function getRandomGameType() : GameType {
 }
 
 function getRandomPower() : PowerType {
-    const index = Math.floor(2*Math.random())
+    const index = Math.floor(3*Math.random())
     switch (index) {
         case 0:
             return "copycat";
-        default: 
-            return "sabotage";
+        case 1:
+            return "sabotage"
+        default:
+            return "spy";
 
     }
 }
@@ -328,6 +345,47 @@ function configurePastChoices(pastChoices: Record<GameType,number[]>): void {
     }
 }
 
+function getRandomChoice(room: string, type: GameType,currChoice: ChoiceType): ChoiceType {
+    if (!games[room]) {
+        return -1;
+    }
+    let outVal : ChoiceType;
+    switch (type) {
+        case "hands":
+            outVal = Math.floor(2*Math.random());
+            break;
+        case "numbers":
+            outVal =  Math.floor(6*Math.random());
+            break;
+        case "opinion":
+            outVal = Math.floor(7*Math.random());
+            break;
+        case "percent":
+            outVal = Math.floor(101*Math.random());
+            break;
+        case "point":
+            outVal = Math.floor(games[room].playerArray.length*Math.random());
+            break;
+        case "emoji":
+            outVal = getRandomEmoji();
+            break;
+    }
+
+    if (outVal == currChoice) {
+        return getRandomChoice(room, type, currChoice);
+    }
+    else {
+        return outVal;
+    }
+}
+
+function getRandomEmoji(): string {
+  // Unicode emoticons block: U+1F600 to U+1F64F
+  const min = 0x1F600;
+  const max = 0x1F64F;
+  const codePoint = min + Math.floor(Math.random() * (max - min));
+  return String.fromCodePoint(codePoint);
+}
 
 const games : Record<string,GameState> = {};
 const gameTimers : Record<string,NodeJS.Timeout> = {}
@@ -501,13 +559,16 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         io.to(room).emit("startGame");
     })
 
-    socket.on("sendSettings", (room: string, answerTimer: number, voteTimer: number, powers: boolean) => {
+    socket.on("sendSettings", (room: string, answerTimer: number, voteTimer: number, turnsPerRound: number, totalTurns: number, pointSelf: boolean, powers: boolean) => {
         if (!games[room]) {
             socket.emit("failedToAccessRoom");
             return
         }
         games[room].answerTimer = answerTimer*1000;
         games[room].voteTimer = voteTimer*1000;
+        games[room].turnsPerRound = turnsPerRound;
+        games[room].totalTurns = totalTurns;
+        games[room].pointSelfChooseAllowed = pointSelf;
         games[room].powerups = powers;
     })
 
@@ -602,6 +663,53 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].choiceArray[id] = index;
         games[room].counter++;
         games[room].playerArray[id].completedPhase = true;
+
+        if (id == games[room].powerTargetIndex) {
+            switch (games[room].powerType) {
+                case "copycat":
+                    games[room].choiceArray[games[room].fakerIndex] = index;
+                    break;
+                case "sabotage":
+                    games[room].choiceArray[id] = getRandomChoice(room, games[room].gameType, index);
+                    break;
+            }
+        }
+
+        if (games[room].counter == games[room].playerArray.length) {
+            changeToVoting(room)
+        }
+        else {
+            socket.emit("getGameState",games[room])
+            io.to(games[room].displaySocket).emit("getGameState",games[room])
+        }
+    })
+
+    socket.on("sendPowerChoice",(room: string, index: number) => {
+        if (!games[room]) {
+            socket.emit("failedToAccessRoom")
+            return
+        };
+        if (games[room].phase != "answering") {
+            return;
+        }
+
+        games[room].powerTargetIndex = index;
+        const fakerIndex = games[room].fakerIndex;
+        games[room].roundPowerUsed = true;
+
+        switch (games[room].powerType) {
+            case "copycat":
+                games[room].choiceArray[fakerIndex] = games[room].choiceArray[index];
+                games[room].playerArray[fakerIndex].completedPhase = true;
+                games[room].counter++;
+                break
+            case "sabotage":
+                if (games[room].choiceArray[index] != -1) {
+                    games[room].choiceArray[index] = getRandomChoice(room, games[room].gameType, games[room].choiceArray[index]);
+                }
+                break
+        }
+
         if (games[room].counter == games[room].playerArray.length) {
             changeToVoting(room)
         }
@@ -643,9 +751,10 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
 
     socket.on("disconnect", (reason) => {
         const roomId = socketToRoom[socket.id];
+        delete socketToRoom[socket.id];
         if (roomId !== undefined && games[roomId] !== undefined) {
             const index = games[roomId].sockets.indexOf(socket.id);
-            if (index >= 0) {
+            if (index >= 0 && games[roomId].playerArray && games[roomId].playerArray[index]) {
                 games[roomId].playerArray[index].connected = false;
                 io.to(roomId).emit("changeConnected",games[roomId].playerArray);
             }
@@ -672,6 +781,8 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         games[room].fakerIndex = getRandomPlayer(games[room].playerArray.length);
         if (games[room].powerups) {
             games[room].powerType = getRandomPower();
+            games[room].roundPowerUsed = false;
+            games[room].powerTargetIndex = -1;
         }
         setCountdown(room,CHOOSING_TIMER);
         io.to(room).emit("getGameState",games[room])
@@ -690,6 +801,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             answerTimer += 15*1000
         }
         setCountdown(room,answerTimer);
+        games[room].powerTargetIndex = -1;
         io.to(room).emit("getGameState",games[room])
         setTimer(room, changeToVoting,answerTimer);
     }
@@ -708,6 +820,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
             answerTimer += 15*1000
         }
         setCountdown(room,answerTimer);
+        games[room].powerTargetIndex = -1;
         io.to(room).emit("getGameState",games[room])
         setTimer(room, changeToVoting,answerTimer);
     }
@@ -755,7 +868,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         resetVoteArray(room);
         resetVoteLocks(room);
         resetChoiceArray(room);
-        if ((games[room].storedChoices[0].length < 3) && (games[room].votedIndex != games[room].fakerIndex)) {
+        if ((games[room].storedChoices[0].length < games[room].turnsPerRound) && (games[room].votedIndex != games[room].fakerIndex)) {
             changeToAnswering(room);
         }
         else {

@@ -20,6 +20,7 @@ const opinions = [
 
 //NEED TO CHANGE THIS
 const fakerImage = "/images/faker.svg";
+const closeImage = "/images/close.svg";
 
 const fakerText = "You are the faker, pick something random"
 
@@ -64,6 +65,28 @@ function getBackgroundColor(type: GameType, phase: Phase) : string {
   }
 }
 
+function getBlankedQuestion(question: string): string {
+  const qarr: string[] = question.split(" ");
+  let qout = "";
+  let counter = 0;
+  let countMax = 1;
+  for (const word of qarr) {
+    if (counter % countMax == 0) {
+      qout += word;
+      countMax = 2 + Math.floor(3*Math.random())
+      counter = 0;
+    }
+    else {
+      qout += "*"
+    }
+    counter++;
+    qout += " "
+  }
+  console.log(qout)
+  console.log(qarr)
+  return qout;
+}
+
 // const gradients = [
 //   { id: "lightgrey", start:"rgb(175, 175, 175)", end: "rgb(128, 128, 128)"},
 //   { id: "tan", start:"rgb(250, 214, 166)", end: "rgb(210, 180, 140)"},
@@ -93,6 +116,7 @@ function Game() {
   const [powerType, setPowerType] = useState<PowerType>("copycat");
   const [showPower, setShowPower] = useState<boolean>(false);
   const [powerUsed, setPowerUsed] = useState<boolean>(false);
+  const [chooseSelfAllowed, setChooseSelfAllowed] = useState<boolean>(false);
 
   const {state} = useLocation()
   const room = state.room;
@@ -148,6 +172,7 @@ function Game() {
       setPowers(gameState.powerups);
       setPowerType(gameState.powerType);
       setPowerUsed(gameState.roundPowerUsed);
+      setChooseSelfAllowed(gameState.pointSelfChooseAllowed);
     }
 
     const handleSocketDisconnect = () => {
@@ -236,6 +261,12 @@ function Game() {
     setPercentVal(50)
   }
 
+  function sendPower(choice: number) : void {
+    socket.emit("sendPowerChoice",room, choice);
+    setShowPower(false);
+    setPowerUsed(true);
+  }
+
   function sendVote(index: number) : void {
     setVoteIndex(index);
     socket.emit("sendVote",room,thisId,index);
@@ -251,7 +282,7 @@ function Game() {
   }
   
   const questionChoiceButtons = useMemo(() => {
-    console.log(opinions)
+    console.log(chooseSelfAllowed)
     switch (gameType) {
       case "hands":
         return <>
@@ -267,6 +298,7 @@ function Game() {
       case "point":
         return <>
           {playerNames.map((name: string, index: number) => 
+            !chooseSelfAllowed && thisId == index ? null : 
             <button key={index} className="buttonGame" onClick={() => sendClick(index)}>{name}</button>
           )}
         </>
@@ -288,19 +320,37 @@ function Game() {
           )}
         </>
     }
-  },[gameType,emojiVal,percentVal])
+  },[gameType,emojiVal,percentVal,chooseSelfAllowed, thisId])
 
   const powerButtons = useMemo(() => {
     switch(powerType) {
       case "copycat":
         return <>
+            <h1>Copycat</h1>
+            <h2>Choose a player to copy</h2>
+            {playerNames.map((name: string, index: number) => 
+            index == thisId ? null :
+            <button key={index} className="buttonGame" onClick={() => sendPower(index)}>{name}</button>
+          )}
         </>
       case "sabotage":
         return <>
+            <h1>Sabotage</h1>
+            <h2>Choose a player to sabotage by giving them a random different answer</h2>
+            {playerNames.map((name: string, index: number) => 
+            index == thisId ? null :
+            <button key={index} className="buttonGame" onClick={() => sendPower(index)}>{name}</button>
+            )}
+        </>
+      case "spy":
+        return <>
+            <h1>Spy</h1>
+            <h2>Use ability to see the fragmented question?</h2>
+            <button className="buttonGame" onClick={() => sendPower(0)}>Activate</button>
         </>
     }
     
-  },[powerType])
+  },[playerNames,powerType])
   // function questionChoiceButtons(type: GameType): JSX.Element {
   //   const numbers = [0,1,2,3,4,5];
   //   switch (type) {
@@ -353,10 +403,13 @@ function Game() {
 
   const questionText: string = useMemo(() => {
     if (thisId == fakerIndex) {
+      if (powers && powerType == "spy" && powerUsed) {
+        return getBlankedQuestion(question)
+      }
       return fakerText
     }
     else return question
-  },[question,fakerIndex])
+  },[powers,powerType,powerUsed,question,fakerIndex])
 
   return<div className="gameBackground" style={{backgroundColor: getBackgroundColor(gameType, phase)}}>
 
@@ -370,7 +423,24 @@ function Game() {
     <br/>
     {timerImage}
     <br/>
-    {powers && phase === "choosing" && showPower && thisId == fakerIndex && !powerUsed && <div className="overlay">
+    {powers && phase === "answering" && showPower && thisId == fakerIndex && !powerUsed && <div className="overlay">
+      <button
+        style={{
+          position: "fixed",
+          top: "1%",
+          right: "1%",
+          width: "clamp(10vw, 15vw, 100px)",   // min 24px, preferred 5vw, max 60px
+          height: "clamp(10vw, 15vw, 100px)",
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+        }}
+        onClick={() => setShowPower(false)}
+      >
+        <svg width="100%" height="100%">
+          <image href={closeImage} height={"100%"} width={"100%"}/>
+        </svg>
+      </button>
       {powerButtons}
     </div>}
     {/* INSERT IMAGE HERE OF A BUTTON THAT WILL MAKE IT SO THE OVERLAY APPEARS */}

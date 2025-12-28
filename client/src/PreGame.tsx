@@ -18,6 +18,9 @@ function PreGame() {
   const [answerTimer, setAnswerTimer] = useState<number>(30);
   const [voteTimer, setVoteTimer] = useState<number>(90);
   const [powerups, setPowerups] = useState<boolean>(false);
+  const [pointSelf, setPointSelf] = useState<boolean>(true);
+  const [turnsPerRound, setTurnsPerRound] = useState<number>(3);
+  const [totalTurns, setTotalTurns] = useState<number>(10);
   const {state} = useLocation()
   const room = state.room;
   let playerId : string;
@@ -31,7 +34,13 @@ function PreGame() {
       let voteTimerOut = voteTimer;
       if (voteTimerOut > 300) {answerTimerOut = 300}
       else if (voteTimerOut < 30) {voteTimerOut = 30}
-      socket.emit("sendSettings",room,answerTimerOut,voteTimerOut,powerups);
+      let turnsOut = turnsPerRound;
+      if (turnsOut < 1) {turnsOut = 1}
+      else if (turnsOut >10) {turnsOut = 10}
+      let totTurnsOut = totalTurns;
+      if (totTurnsOut < 1) {totTurnsOut = 1}
+      else if (totTurnsOut >10) {totTurnsOut = 100}
+      socket.emit("sendSettings",room,answerTimerOut,voteTimerOut,turnsOut,totTurnsOut,pointSelf,powerups);
     }
     socket.emit("triggerStartGame",room)
   }
@@ -54,6 +63,20 @@ function PreGame() {
       setVoteTimer(30);
     }
     setVoteTimer(parseInt(e.target.value))
+  }
+
+  const trySetTurnsPerRound = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value == "") {
+      setTurnsPerRound(1);
+    }
+    setTurnsPerRound(parseInt(e.target.value))
+  }
+
+  const trySetTotalTurns = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value == "") {
+      setTotalTurns(1);
+    }
+    setTotalTurns(parseInt(e.target.value))
   }
 
   const changeName = (name: string) => {
@@ -184,14 +207,22 @@ function PreGame() {
             </svg>
           </button>
         <span>Answering timer: </span>
-        <input type="number" min={15} max={200} width={1} value={answerTimer} onChange={(e) => trySetAnswerTimer(e)}/>
+        <input className={"inputGame"} type="number" min={15} max={200} width={1} value={answerTimer} onChange={(e) => trySetAnswerTimer(e)}/>
         <br/>
         <span>Voting timer: </span>
-        <input type="number" min={30} max={300} width={5} value={voteTimer} onChange={(e) => trySetVoteTimer(e)}/>
+        <input className={"inputGame"} type="number" min={30} max={300} width={5} value={voteTimer} onChange={(e) => trySetVoteTimer(e)}/>
         <br/>
+        <span>Turns per round: </span>
+        <input className={"inputGame"} type="number" min={1} max={10} width={5} value={turnsPerRound} onChange={(e) => trySetTurnsPerRound(e)}/>
+        <br/>
+        <span>Total turns: </span>
+        <input className={"inputGame"} type="number" min={1} max={100} width={5} value={totalTurns} onChange={(e) => trySetTotalTurns(e)}/>
+        <br/>
+        <span>Self choose allowed in pointing mode?</span>
+        <input className={"inputGame"} type="checkbox" checked={pointSelf} onChange={(e) => setPointSelf(e.target.checked)}/>
         <span>Powerups?</span>
-        <input type="checkbox" checked={powerups} onChange={(e) => setPowerups(e.target.checked)}/>
-
+        <input className={"inputGame"} type="checkbox" checked={powerups} onChange={(e) => setPowerups(e.target.checked)}/>
+        
       </div>) : null}
       <div>
         {thisId == 0 ? (
@@ -212,12 +243,12 @@ function PreGame() {
               <image href={settingsImage} height={"100%"} width={"100%"}/>
             </svg>
           </button>): null}
-        <input id="nameInput" autoComplete="off" type="text" maxLength={8} placeholder="Player name" value={name} onChange={(e) => 
+        <input className={"inputGame"} id="nameInput" autoComplete="off" type="text" maxLength={8} placeholder="Player name" value={name} onChange={(e) => 
           changeTheName(e)}/>  
-        <button disabled={!nameChange} onClick={() => changeName(name)}>Change name</button>
+        <button className={"buttonGame"} disabled={!nameChange} onClick={() => changeName(name)}>Change name</button>
       </div>
       <br/>
-      {thisId === 0 ? (<button disabled={length < 3} onClick={triggerStartGame}>Start Game</button>) : null}
+      {thisId === 0 ? (<button className={"buttonGame"} disabled={length < 3} onClick={triggerStartGame}>Start Game</button>) : null}
     </div>
   
 }

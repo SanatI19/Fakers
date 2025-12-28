@@ -39,7 +39,8 @@ export interface ClientToServerEvents {
     triggerEndGame: (room: string) => void;
     sendEmoji: (room: string, id: number, emoji: string) => void;
     sendPastChoices: (room: string, pastChoices: Record<GameType,number[]>) => void;
-    sendSettings: (room: string, answerTimer: number, voteTimer: number, powers: boolean) => void;
+    sendSettings: (room: string, answerTimer: number, voteTimer: number, turnsPerRound: number, totalTurns: number, pointSelf:boolean, powers: boolean) => void;
+    sendPowerChoice: (room: string, choice: number) => void;
 }
 
 export type ChoiceType = number | string;
@@ -76,6 +77,10 @@ export interface GameState {
     powerups: boolean;
     powerType: PowerType;
     roundPowerUsed: boolean;
+    powerTargetIndex: number;
+    pointSelfChooseAllowed: boolean;
+    turnsPerRound: number;
+    totalTurns: number;
 }
 
 export interface IDisplayFunction {
@@ -86,7 +91,7 @@ export type Phase = "choosing" | "answering" | "voting" | "reveal" | "scoring" |
 
 export type GameType = "hands" | "numbers" | "point" | "emoji" | "percent" | "opinion" ;
 
-export type PowerType = "copycat" | "sabotage";
+export type PowerType = "copycat" | "sabotage" | "spy";
 
 export class Player {
     public deviceId: string;

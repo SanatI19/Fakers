@@ -843,6 +843,7 @@ function GameDisplay() {
   // console.log(replayScreen)
   // console.log(showWinner)
   // console.log(gameOverImages)
+  console.log(choiceArray)
 
   return <div className={"displayBackground"}>
   <svg id="main" x = "0px" y="0px" xmlns = "http://www.w3.org/2000/svg" viewBox="0 0 100 50">
