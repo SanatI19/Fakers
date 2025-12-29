@@ -59,8 +59,8 @@ const percentTasks = dataPercent.split("\n");
 const dataOpinion = readFileSync("../opinion.txt", "utf-8");
 const opinionTasks = dataOpinion.split("\n");
 
-const fakerScoreRound = [200,250,300]
-const nonFakerScoreRound = [250,200,150]
+const fakerScoreRound = 200;
+const nonFakerScoreRound = 250
 
 function resetChoiceArray(room: string) {
     games[room].choiceArray = Array(games[room].playerArray.length).fill(-1);
@@ -113,6 +113,7 @@ function newGameState(type: boolean):GameState {
         pointSelfChooseAllowed: true,
         turnsPerRound: 3,
         totalTurns: MAX_ROUNDS,
+        blankedQuestion: "",
     };
 }
 
@@ -343,6 +344,26 @@ function configurePastChoices(pastChoices: Record<GameType,number[]>): void {
     if (!("opinion" in pastChoices)) {
        (pastChoices as Record<GameType,number[]>)["opinion"] = [];
     }
+}
+
+function getBlankedQuestion(question: string): string {
+  const qarr: string[] = question.split(" ");
+  let qout = "";
+  let counter = 0;
+  let countMax = 1;
+  for (const word of qarr) {
+    if (counter % countMax == 0) {
+      qout += word;
+      countMax = 2 + Math.floor(3*Math.random())
+      counter = 0;
+    }
+    else {
+      qout += word.replace(/./g, "*");
+    }
+    counter++;
+    qout += " "
+  }
+  return qout;
 }
 
 function getRandomChoice(room: string, type: GameType,currChoice: ChoiceType): ChoiceType {
@@ -645,6 +666,9 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         type == "numbers" ? string=string.slice(0,string.length-1) : string=string;
         const question : string = prefix + string
         games[room].question = question;
+        if (games[room].powerups) {
+            games[room].blankedQuestion = getBlankedQuestion(question);
+        }
         games[room].phase = "answering";
     }
 
@@ -961,7 +985,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         }
         for (let i = 0; i < votedFor.length; i++) {
             if (!(i == votedFor.length-1 && games[room].fakerCaught)) {
-                outNum += fakerScoreRound[i]
+                outNum += Math.min(fakerScoreRound+50*i,500);
                 outNum += 10*(Math.round(10/(games[room].playerArray.length-1)*votedFor[i]));
                 // outNum -= 100*1/(games[room].playerArray.length-1)*votedFor[i];
             }
@@ -996,7 +1020,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
 
         for (let i= 0; i< successfullyVotedFor.length; i++) {
             if (!successfullyVotedFor[i]) {
-                outNum += correctVote[i] ? (nonFakerScoreRound[i]): 0;
+                outNum += correctVote[i] ? (Math.max(nonFakerScoreRound-50*i,100)): 0;
             }
         }
         return outNum

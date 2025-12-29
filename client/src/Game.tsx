@@ -65,28 +65,6 @@ function getBackgroundColor(type: GameType, phase: Phase) : string {
   }
 }
 
-function getBlankedQuestion(question: string): string {
-  const qarr: string[] = question.split(" ");
-  let qout = "";
-  let counter = 0;
-  let countMax = 1;
-  for (const word of qarr) {
-    if (counter % countMax == 0) {
-      qout += word;
-      countMax = 2 + Math.floor(3*Math.random())
-      counter = 0;
-    }
-    else {
-      qout += "*"
-    }
-    counter++;
-    qout += " "
-  }
-  console.log(qout)
-  console.log(qarr)
-  return qout;
-}
-
 // const gradients = [
 //   { id: "lightgrey", start:"rgb(175, 175, 175)", end: "rgb(128, 128, 128)"},
 //   { id: "tan", start:"rgb(250, 214, 166)", end: "rgb(210, 180, 140)"},
@@ -117,6 +95,7 @@ function Game() {
   const [showPower, setShowPower] = useState<boolean>(false);
   const [powerUsed, setPowerUsed] = useState<boolean>(false);
   const [chooseSelfAllowed, setChooseSelfAllowed] = useState<boolean>(false);
+  const [blankedQuestion, setBlankedQuestion] = useState<string>("");
 
   const {state} = useLocation()
   const room = state.room;
@@ -173,6 +152,7 @@ function Game() {
       setPowerType(gameState.powerType);
       setPowerUsed(gameState.roundPowerUsed);
       setChooseSelfAllowed(gameState.pointSelfChooseAllowed);
+      setBlankedQuestion(gameState.blankedQuestion);
     }
 
     const handleSocketDisconnect = () => {
@@ -310,7 +290,7 @@ function Game() {
       case "percent":
         return <>
           <p>{percentVal}%</p>
-          <input className="inputGame" type="range" min={0} max={100} value={percentVal} onChange={handlePercentChange}/>
+          <input className="inputGame" type="range" min={0} max={100} step={5} value={percentVal} onChange={handlePercentChange}/>
           <button className="buttonGame" onClick={() => sendClick(percentVal)}>Submit</button>
         </>
       case "opinion":
@@ -404,7 +384,7 @@ function Game() {
   const questionText: string = useMemo(() => {
     if (thisId == fakerIndex) {
       if (powers && powerType == "spy" && powerUsed) {
-        return getBlankedQuestion(question)
+        return blankedQuestion;
       }
       return fakerText
     }

@@ -81,6 +81,7 @@ export interface GameState {
     pointSelfChooseAllowed: boolean;
     turnsPerRound: number;
     totalTurns: number;
+    blankedQuestion: string;
 }
 
 export interface IDisplayFunction {
