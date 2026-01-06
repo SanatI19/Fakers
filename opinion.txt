@@ -21,7 +21,7 @@ I care about others’ opinions of me.
 I’m usually the one who initiates plans.
 I get overwhelmed in large social settings.
 I enjoy deep conversations more than small talk.
-I judge people quickly without meaning to.
+I judge people quickly.
 I like being part of group projects.
 I’m comfortable asking for help.
 I tend to forgive people easily.
@@ -38,7 +38,6 @@ I work better under pressure.
 I need background noise while working.
 I enjoy cooking.
 I often multitask.
-I check my phone too often.
 I like learning new skills in my free time.
 I enjoy physical exercise.
 I drink too much caffeine.
@@ -109,7 +108,7 @@ I feel most productive when my schedule is packed.
 I get discouraged easily when things don’t go my way.
 I often take on more than I should.
 I enjoy solving puzzles.
-I understand concepts better when I explain them to someone else.
+I learn best by being told/taught.
 I like thinking about abstract ideas.
 I prefer concrete facts over theories.
 I learn best by watching others.
@@ -125,11 +124,10 @@ I love inside jokes more than new ones.
 I talk too much when I’m nervous.
 I get attached to people quickly.
 I expect too much from the people I care about.
-I put effort into maintaining friendships.
+I put a lot of effort into maintaining friendships.
 I value loyalty above all else in relationships.
 I enjoy meeting new people regularly.
 I think I’m good at comforting others.
-I prefer quality time over gifts or compliments.
 I prefer working in teams rather than alone.
 I often take leadership roles even when I don’t plan to.
 I stay calm during high-pressure tasks.
@@ -219,7 +217,7 @@ I feel most productive early in the morning.
 I often stay up later than I planned.
 I trust my instincts even when I can’t explain why.
 I often sense tension before anyone says anything.
-I ignore red flags more than I should.
+I ignore red flags often.
 I like trying unfamiliar or exotic foods.
 I have strong opinions about what food is good.
 I enjoy cooking more than eating out.
@@ -268,16 +266,16 @@ I lose respect for people when they don’t follow through on plans.
 I think most group leaders enjoy the power more than they admit.
 I think oversharing is more common than good communication.
 I think being mysterious is more attractive than being open.
-I believe some friendships survive only out of convenience.
+I believe most friendships survive only out of convenience.
 I think people lie more often than they realize.
-I enjoy being underestimated because it gives me an advantage.
+I enjoy being underestimated.
 I’m more dramatic in my head than in real life.
 I take things personally even when I know I shouldn’t.
 I replay the perfect comeback hours after an argument.
 I sometimes create problems by overthinking things that were fine.
 I like being the “surprisingly good” one at something.
-I get jealous faster than I show it.
-I care more about winning than I publicly admit.
+I get jealous easily.
+I care more a lot about winning.
 I get petty when I feel ignored.
 I sometimes want attention even when I claim I don’t.
 I think attraction can grow from someone’s personality alone.
@@ -291,8 +289,8 @@ I pull away when someone gets too close too fast.
 I think compatibility is more rare than people think.
 I notice the smallest changes in someone I care about.
 I procrastinate even when I care a lot about the outcome.
-I clean when I’m angry as a form of revenge on my environment.
-I secretly enjoy hearing gossip even if I act like I don’t.
+I clean when I’m angry/upset.
+I enjoy hearing gossip.
 I buy things to feel something.
 I act more confident than I feel in most situations.
 I believe people reveal their true character when they’re frustrated.
@@ -310,7 +308,7 @@ I believe most people choose stability at the cost of potential.
 I believe endings are more important than beginnings.
 I enjoy learning secrets even if they’re small.
 I judge myself harsher than anyone else does.
-I judge myself harsher than I judge others
+I judge myself harsher than I judge others.
 I crave recognition more than I admit.
 I get competitive with people who don’t even know we’re competing.
 I enjoy observing group dynamics more than participating.
@@ -338,7 +336,7 @@ I notice patterns in people’s behavior without trying.
 I find it hard not to flirt when someone’s charming.
 I’ve stayed in a situation longer than I should because it felt comfortable.
 I sometimes pretend I don’t care way more than I actually don’t care.
-The “chase” is more fun than the relationship sometimes.
+The “chase” is more fun than the relationship.
 I’d rather someone be too confident than too shy.
 I enjoy being the one with more emotional control in a relationship.
 I think some secrets genuinely do make people more interesting.

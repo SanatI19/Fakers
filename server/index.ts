@@ -382,7 +382,7 @@ function getRandomChoice(room: string, type: GameType,currChoice: ChoiceType): C
             outVal = Math.floor(7*Math.random());
             break;
         case "percent":
-            outVal = Math.floor(101*Math.random());
+            outVal = 5*Math.floor(21*Math.random());
             break;
         case "point":
             outVal = Math.floor(games[room].playerArray.length*Math.random());
