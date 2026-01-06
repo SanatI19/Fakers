@@ -667,7 +667,7 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
         const question : string = prefix + string
         games[room].question = question;
         if (games[room].powerups) {
-            games[room].blankedQuestion = getBlankedQuestion(question);
+            games[room].blankedQuestion = prefix + getBlankedQuestion(string);
         }
         games[room].phase = "answering";
     }
