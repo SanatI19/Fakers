@@ -196,6 +196,7 @@ function GameDisplay() {
   const [endTime,setEndTime] = useState<number>(0);
   const [remaining, setRemaining] = useState<number>(0);
   const [chooserIndex, setChooserIndex] = useState<number>(0);
+  const [gamePaused, setGamePaused] = useState<boolean>(false);
 
   const {state} = useLocation()
   const room = state.room;
@@ -232,6 +233,7 @@ function GameDisplay() {
       setEndTime(gameState.endTime);
       setChooserIndex(gameState.chooserIndex);
       localStorage.setItem("fakersPastChoices",JSON.stringify(gameState.pastChoices))
+      setGamePaused(gameState.gamePaused)
     }
 
     const handleSocketDisconnect = () => {
@@ -843,9 +845,19 @@ function GameDisplay() {
   // console.log(replayScreen)
   // console.log(showWinner)
   // console.log(gameOverImages)
-  console.log(choiceArray)
+  // console.log(choiceArray)
+
+  const pauseOverlay = useMemo(() => {
+    return (
+    gamePaused ? <div className="overlay">
+      <p>Game is paused</p>
+    </div>
+    : null
+  )}
+  ,[gamePaused])
 
   return <div className={"displayBackground"}>
+  {pauseOverlay}
   <svg id="main" x = "0px" y="0px" xmlns = "http://www.w3.org/2000/svg" viewBox="0 0 100 50">
     <defs>
       <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">

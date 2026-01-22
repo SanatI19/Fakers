@@ -41,6 +41,8 @@ export interface ClientToServerEvents {
     sendPastChoices: (room: string, pastChoices: Record<GameType,number[]>) => void;
     sendSettings: (room: string, answerTimer: number, voteTimer: number, turnsPerRound: number, totalTurns: number, pointSelf:boolean, powers: boolean) => void;
     sendPowerChoice: (room: string, choice: number) => void;
+    pauseGame: (room: string, timerVal: number) => void;
+    unpauseGame: (room: string) => void;
 }
 
 export type ChoiceType = number | string;
@@ -82,6 +84,8 @@ export interface GameState {
     turnsPerRound: number;
     totalTurns: number;
     blankedQuestion: string;
+    gamePaused: boolean;
+    gameTimersStoredVal: number;
 }
 
 export interface IDisplayFunction {

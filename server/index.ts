@@ -6,6 +6,7 @@ import cors from "cors";
 import {ServerToClientEvents , ClientToServerEvents, Player, GameState, GameType, IDisplayFunction, ChoiceType, PowerType} from "../shared";
 import path from "path";
 import { readFileSync } from "fs";
+import { timer } from 'd3';
 
 const app = express()
 app.use(cors());
@@ -114,6 +115,8 @@ function newGameState(type: boolean):GameState {
         turnsPerRound: 3,
         totalTurns: MAX_ROUNDS,
         blankedQuestion: "",
+        gamePaused: false,
+        gameTimersStoredVal: 0,
     };
 }
 
@@ -766,6 +769,46 @@ io.on("connection", (socket: Socket<ClientToServerEvents,ServerToClientEvents>) 
     
     socket.on("triggerEndGame", (room: string) => {
         deleteRoom(room);
+    })
+
+    socket.on("pauseGame",(room: string, timerVal: number) => {
+        if (!games[room]) {
+            socket.emit("failedToAccessRoom");
+        }
+        const phase = games[room].phase;
+        if (phase != "answering" && phase != "choosing" && phase != "voting") {
+            return;
+        }
+        games[room].gamePaused = true;
+        games[room].gameTimersStoredVal = timerVal;
+        resetRoomTimeout(room,1)
+        removeTimers(room);
+        io.to(room).emit("getGameState",games[room]);
+    })
+
+    socket.on("unpauseGame",(room: string) => {
+        if (!games[room]) {
+            socket.emit("failedToAccessRoom");
+        }
+        resetRoomTimeout(room, 1);
+        games[room].gamePaused = false;
+        const phase = games[room].phase;
+        const remainingTime = games[room].gameTimersStoredVal;
+        setCountdown(room, remainingTime);
+        io.to(room).emit("getGameState",games[room]);
+        switch (phase) {
+            case "answering":
+                setTimer(room, changeToVoting, remainingTime)
+                break;
+            case "choosing":
+                setTimer(room, changeToAnsweringAfterTimer, remainingTime)
+                break
+            case "voting":
+                setTimer(room, changeToReveal, remainingTime)
+                break;
+            default:
+                break;
+        }
     })
 
     function setCountdown(room: string, timer: number) {

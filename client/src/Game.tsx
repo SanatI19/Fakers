@@ -1,5 +1,5 @@
 
-import { useContext, useEffect, useState, useMemo, JSX} from "react";
+import { useContext, useEffect, useState, useMemo, JSX, useCallback} from "react";
 // import { motion } from "framer-motion";
 import { useLocation, useNavigate} from "react-router-dom";
 import { SocketContext } from "./App";
@@ -21,6 +21,7 @@ const opinions = [
 //NEED TO CHANGE THIS
 const fakerImage = "/images/faker.svg";
 const closeImage = "/images/close.svg";
+const pauseImage = "/images/pause.svg";
 
 const fakerText = "You are the faker, pick something random"
 
@@ -96,12 +97,11 @@ function Game() {
   const [powerUsed, setPowerUsed] = useState<boolean>(false);
   const [chooseSelfAllowed, setChooseSelfAllowed] = useState<boolean>(false);
   const [blankedQuestion, setBlankedQuestion] = useState<string>("");
+  const [gamePaused, setGamePaused] = useState<boolean>(false);
 
   const {state} = useLocation()
   const room = state.room;
   const thisId = state.id;
-
-  console.log(thisId)
 
   useEffect(() => {
     socket.emit("requestInitialState", room, thisId)
@@ -153,6 +153,7 @@ function Game() {
       setPowerUsed(gameState.roundPowerUsed);
       setChooseSelfAllowed(gameState.pointSelfChooseAllowed);
       setBlankedQuestion(gameState.blankedQuestion);
+      setGamePaused(gameState.gamePaused);
     }
 
     const handleSocketDisconnect = () => {
@@ -262,7 +263,6 @@ function Game() {
   }
   
   const questionChoiceButtons = useMemo(() => {
-    console.log(chooseSelfAllowed)
     switch (gameType) {
       case "hands":
         return <>
@@ -391,6 +391,25 @@ function Game() {
     else return question
   },[powers,powerType,powerUsed,question,fakerIndex])
 
+  const handleUnpause = useCallback(() => {
+    socket.emit("unpauseGame",room)
+  },[room,])
+
+  const pauseOverlay = useMemo(() => {
+    return (
+    gamePaused ? <div className="overlay">
+      <p>Game is paused</p>
+      {thisId == 0 && <button onClick={handleUnpause}>Resume</button>}
+    </div>
+    : null
+  )}
+  ,[gamePaused])
+
+  const handlePause = useCallback(() => {
+    const outVal = Math.round(remaining);
+    socket.emit("pauseGame",room, outVal)
+  },[room,remaining])
+
   return<div className="gameBackground" style={{backgroundColor: getBackgroundColor(gameType, phase)}}>
 
     <h2 style={{
@@ -401,6 +420,24 @@ function Game() {
       display: "inline-block"
     }}>{phase == "gameover" ? "Game over" : ( phase == "choosing" ? "Choosing a game type": getGameTypeString(gameType))}</h2>
     <br/>
+    {pauseOverlay}
+    {thisId == 0 && <button className="buttonGame"
+        style={{
+          position: "fixed",
+          top: "1%",
+          left: "1%",
+          width: "clamp(10vw, 15vw, 100px)",   // min 24px, preferred 5vw, max 60px
+          height: "clamp(10vw, 15vw, 100px)",
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+        }}
+        onClick={handlePause}
+      >
+        <svg width="100%" height="100%">
+          <image href={pauseImage} height={"100%"} width={"100%"}/>
+        </svg>
+      </button>}
     {timerImage}
     <br/>
     {powers && phase === "answering" && showPower && thisId == fakerIndex && !powerUsed && <div className="overlay">
