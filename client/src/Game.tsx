@@ -421,7 +421,8 @@ function Game() {
     }}>{phase == "gameover" ? "Game over" : ( phase == "choosing" ? "Choosing a game type": getGameTypeString(gameType))}</h2>
     <br/>
     {pauseOverlay}
-    {thisId == 0 && <button className="buttonGame"
+    {thisId == 0 && (phase == "choosing" || phase == "answering" || phase == "voting") &&
+    <button className="buttonGame"
         style={{
           position: "fixed",
           top: "1%",
