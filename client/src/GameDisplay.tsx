@@ -879,7 +879,7 @@ function GameDisplay() {
       </g>
       <g>
         <rect x="88.5" y="1.5" rx="1" ry="1" height={2} width={10} fill="url(#white)"/>
-        <text x="89" y="3" fontSize={1.5} fontWeight={"bold"}>Room: HFVO</text>
+        <text x="89" y="3" fontSize={1.5} fontWeight={"bold"}>Room: {room}</text>
       </g>    
       <g>
         {(() => {
