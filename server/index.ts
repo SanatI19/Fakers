@@ -6,7 +6,6 @@ import cors from "cors";
 import {ServerToClientEvents , ClientToServerEvents, Player, GameState, GameType, IDisplayFunction, ChoiceType, PowerType} from "../shared";
 import path from "path";
 import { readFileSync } from "fs";
-import { timer } from 'd3';
 
 const app = express()
 app.use(cors());
